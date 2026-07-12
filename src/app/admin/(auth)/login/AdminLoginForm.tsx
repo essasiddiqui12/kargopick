@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
         </form>
 
         <p className="mt-6 text-center text-xs text-surface-400">
-          Default password: <code className="text-surface-600">admin123</code>
+          Enter the password provided by the administrator.
         </p>
       </div>
     </div>

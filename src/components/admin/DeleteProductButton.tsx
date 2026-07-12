@@ -13,9 +13,13 @@ export default function DeleteProductButton({ id, name }: { id: string; name: st
     setLoading(true);
     try {
       const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        router.refresh();
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to delete product");
       }
+      router.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete product");
     } finally {
       setLoading(false);
     }

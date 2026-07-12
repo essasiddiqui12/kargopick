@@ -63,12 +63,11 @@ export async function createOrder(data: {
     if (result.discount !== (data.discount || 0)) {
       throw new Error("Coupon discount mismatch. Please re-apply the coupon.");
     }
-    await incrementCouponUsage(data.couponCode);
   }
 
   await reserveStockForOrder(data.items);
 
-  const id = `ORD-${Date.now().toString(36).toUpperCase()}`;
+  const id = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6)}`;
   const order: Order = {
     ...data,
     id,
@@ -80,6 +79,11 @@ export async function createOrder(data: {
   const { error } = await supabase.from("orders").insert(orderToRow(order));
 
   if (error) throw new Error(error.message);
+
+  if (data.couponCode) {
+    await incrementCouponUsage(data.couponCode);
+  }
+
   return order;
 }
 

@@ -50,14 +50,19 @@ export default function OrderStatusSelect({ order }: { order: Order }) {
       router.refresh();
 
       if (shouldNotifyCustomerOnStatus(status)) {
-        const message = buildOrderStatusUpdateMessage(
-          { ...order, status },
-          status,
-          window.location.origin
+        const shouldSend = confirm(
+          `Send WhatsApp notification to ${order.phone} about order ${order.id}?`
         );
-        const url = getWhatsAppUrlForPhone(order.phone, message);
-        window.open(url, "_blank", "noopener,noreferrer");
-        setNotice("WhatsApp opened — tap Send to notify customer");
+        if (shouldSend) {
+          const message = buildOrderStatusUpdateMessage(
+            { ...order, status },
+            status,
+            window.location.origin
+          );
+          const url = getWhatsAppUrlForPhone(order.phone, message);
+          window.open(url, "_blank", "noopener,noreferrer");
+          setNotice("WhatsApp opened — tap Send to notify customer");
+        }
       }
     } catch (err) {
       setCurrentStatus(order.status);

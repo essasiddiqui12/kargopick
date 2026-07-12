@@ -12,8 +12,14 @@ export default function DeleteOrderButton({ id }: { id: string }) {
     if (!confirm(`Delete order ${id}?`)) return;
     setLoading(true);
     try {
-      await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to delete order");
+      }
       router.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete order");
     } finally {
       setLoading(false);
     }

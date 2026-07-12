@@ -81,7 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) =>
       prev.map((item) => {
         if (item.product.id !== productId) return item;
-        const maxQty = item.product.stock > 0 ? item.product.stock : quantity;
+        const maxQty = Math.max(0, item.product.stock);
         return { ...item, quantity: Math.min(quantity, maxQty) };
       })
     );

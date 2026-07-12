@@ -18,8 +18,14 @@ export default function DeleteCouponButton({
     if (!confirm(`Delete coupon "${code}"?`)) return;
     setLoading(true);
     try {
-      await fetch(`/api/admin/coupons/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/coupons/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to delete coupon");
+      }
       router.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete coupon");
     } finally {
       setLoading(false);
     }

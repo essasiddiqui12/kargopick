@@ -2,8 +2,11 @@ import { CartItem, AppliedCoupon, Product, Order, OrderStatus } from "@/types";
 import { formatPrice } from "@/data/products";
 import { BRAND_NAME } from "@/lib/brand";
 
-export const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919876543210";
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "";
+
+if (!WHATSAPP_NUMBER && process.env.NODE_ENV !== "test") {
+  console.error("NEXT_PUBLIC_WHATSAPP_NUMBER is not set. WhatsApp features will not work.");
+}
 
 export function formatWhatsAppDisplay(phone = WHATSAPP_NUMBER): string {
   const digits = phone.replace(/\D/g, "");
