@@ -1,9 +1,11 @@
 import { PackageSearch } from "lucide-react";
 import TrackOrderForm from "@/components/TrackOrderForm";
 
+import { BRAND_NAME } from "@/lib/brand";
+
 export const metadata = {
-  title: "Track Order | Kartix",
-  description: "Track your Kartix order status with your order ID and phone number.",
+  title: `Track Order | ${BRAND_NAME}`,
+  description: `Track your ${BRAND_NAME} order status with your order ID and phone number.`,
 };
 
 export default async function TrackOrderPage({

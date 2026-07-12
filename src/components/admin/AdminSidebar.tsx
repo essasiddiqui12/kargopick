@@ -10,12 +10,15 @@ import {
   Dumbbell,
   ShoppingCart,
   Tag,
+  Settings,
 } from "lucide-react";
+import { BRAND_PREFIX, BRAND_SUFFIX } from "@/lib/brand";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/coupons", label: "Coupons", icon: Tag },
+  { href: "/admin/settings", label: "Store Settings", icon: Settings },
   { href: "/admin/products/new", label: "Add Product", icon: Plus },
 ];
 
@@ -35,7 +38,7 @@ export default function AdminSidebar() {
         </div>
         <div>
           <span className="font-bold text-surface-900">
-            Kart<span className="text-brand-600">ix</span>
+            {BRAND_PREFIX}<span className="text-brand-600">{BRAND_SUFFIX}</span>
           </span>
           <p className="text-xs text-surface-500">Admin Panel</p>
         </div>
@@ -50,7 +53,9 @@ export default function AdminSidebar() {
                 ? pathname.startsWith("/admin/orders")
                 : link.href === "/admin/coupons"
                   ? pathname.startsWith("/admin/coupons")
-                  : pathname.startsWith(link.href);
+                  : link.href === "/admin/settings"
+                    ? pathname.startsWith("/admin/settings")
+                    : pathname.startsWith(link.href);
           return (
             <Link
               key={link.href}

@@ -9,6 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { CartItem, Product } from "@/types";
+import { CART_STORAGE_KEY } from "@/lib/brand";
 
 interface CartContextType {
   items: CartItem[];
@@ -32,19 +33,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem("kartix-cart");
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
     if (saved) {
       try {
         setItems(JSON.parse(saved));
       } catch {
-        localStorage.removeItem("kartix-cart");
+        localStorage.removeItem(CART_STORAGE_KEY);
       }
     }
   }, []);
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem("kartix-cart", JSON.stringify(items));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     }
   }, [items, mounted]);
 

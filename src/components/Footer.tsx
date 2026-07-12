@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { Dumbbell, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { formatWhatsAppDisplay, getWhatsAppUrl, buildEnquiryMessage } from "@/lib/whatsapp";
+import SiteLogo from "@/components/SiteLogo";
+import { BRAND_NAME, BRAND_EMAIL } from "@/lib/brand";
 
-export default function Footer() {
+export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
   const whatsappUrl = getWhatsAppUrl(buildEnquiryMessage());
   const phoneDisplay = formatWhatsAppDisplay();
   return (
@@ -10,13 +12,8 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600">
-                <Dumbbell className="h-4 w-4 text-white" />
-              </div>
-              <span className="text-lg font-bold text-surface-900">
-                Kart<span className="text-brand-600">ix</span>
-              </span>
+            <div className="mb-4">
+              <SiteLogo logoUrl={logoUrl} size="sm" />
             </div>
             <p className="text-sm text-surface-600 leading-relaxed">
               Your trusted source for premium gym supplements, proteins, and
@@ -69,7 +66,7 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-surface-600">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-brand-500" />
-                support@kartix.com
+                {BRAND_EMAIL}
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-brand-500" />
@@ -91,7 +88,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t border-surface-200 pt-6 text-center text-sm text-surface-500">
-          &copy; {new Date().getFullYear()} Kartix. All rights reserved.
+          &copy; {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
         </div>
       </div>
     </footer>

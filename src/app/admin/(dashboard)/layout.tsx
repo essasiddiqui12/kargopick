@@ -1,6 +1,8 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import NewOrderNotifier from "@/components/admin/NewOrderNotifier";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardLayout({
   children,
 }: {

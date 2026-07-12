@@ -1,4 +1,4 @@
--- Kartix initial schema
+-- Kargopick initial schema
 
 create table if not exists public.products (
   id text primary key,

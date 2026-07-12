@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import { BRAND_NAME } from "@/lib/brand";
 import { categories } from "@/data/products";
 import { Product } from "@/types";
 
@@ -23,7 +24,7 @@ export default function RelatedProducts({
             You may also like
           </h2>
           <p className="mt-1 text-sm text-surface-500">
-            More {category?.name.toLowerCase() ?? "products"} from Kartix
+            More {category?.name.toLowerCase() ?? "products"} from {BRAND_NAME}
           </p>
         </div>
         {category && (

@@ -1,7 +1,6 @@
 import { getOrders } from "@/lib/orders";
 import { formatPrice } from "@/data/products";
 import OrderStatusSelect from "@/components/admin/OrderStatusSelect";
-import OrderStatusBadge from "@/components/admin/OrderStatusBadge";
 import DeleteOrderButton from "@/components/admin/DeleteOrderButton";
 import OrderWhatsAppActions from "@/components/admin/OrderWhatsAppActions";
 
@@ -88,10 +87,7 @@ export default async function AdminOrdersPage() {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="space-y-2">
-                      <OrderStatusBadge status={order.status} />
-                      <OrderStatusSelect order={order} />
-                    </div>
+                    <OrderStatusSelect order={order} />
                   </td>
                   <td className="px-6 py-4 text-xs text-surface-500 whitespace-nowrap">
                     {formatDate(order.createdAt)}

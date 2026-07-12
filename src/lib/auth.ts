@@ -5,8 +5,8 @@ import { getSessionToken, SESSION_COOKIE } from "@/lib/auth-session";
 export { SESSION_COOKIE, getSessionToken } from "@/lib/auth-session";
 
 export function verifyPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
-  const a = Buffer.from(password);
+  const adminPassword = (process.env.ADMIN_PASSWORD || "admin123").trim();
+  const a = Buffer.from(password.trim());
   const b = Buffer.from(adminPassword);
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);

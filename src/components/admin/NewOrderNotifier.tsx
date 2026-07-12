@@ -11,9 +11,9 @@ import {
   getWhatsAppUrlForPhone,
   buildCustomerReplyMessage,
 } from "@/lib/whatsapp";
+import { BRAND_NAME, SEEN_ORDERS_KEY } from "@/lib/brand";
 
 const POLL_INTERVAL_MS = 20_000;
-const SEEN_ORDERS_KEY = "kartix-seen-orders";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -47,7 +47,7 @@ function notifyOrder(order: Order) {
     return;
   }
 
-  new Notification("New Kartix Order", {
+  new Notification(`New ${BRAND_NAME} Order`, {
     body: `${order.id} — ${order.customerName} — ${formatPrice(order.total)}`,
     tag: order.id,
   });

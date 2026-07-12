@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ShoppingCart, Menu, X, Dumbbell } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import SiteLogo from "@/components/SiteLogo";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,25 +15,15 @@ const navLinks = [
   { href: "/products?category=imported", label: "Imported" },
 ];
 
-export default function Header() {
+export default function Header({ logoUrl }: { logoUrl?: string | null }) {
   const { totalItems, setIsCartOpen } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-surface-300/60 bg-white/70 backdrop-blur-xl shadow-sm shadow-brand-500/5">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 group-hover:from-brand-400 group-hover:to-brand-500 transition-all shadow-md shadow-brand-500/20">
-            <Dumbbell className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <span className="text-xl font-bold tracking-tight text-surface-900">
-              Kart<span className="text-brand-600">ix</span>
-            </span>
-            <span className="hidden sm:block text-xs text-surface-500 -mt-1">
-              Supplements & Imports
-            </span>
-          </div>
+        <Link href="/" className="group">
+          <SiteLogo logoUrl={logoUrl} />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">

@@ -1,5 +1,6 @@
 import { CartItem, AppliedCoupon, Product, Order, OrderStatus } from "@/types";
 import { formatPrice } from "@/data/products";
+import { BRAND_NAME } from "@/lib/brand";
 
 export const WHATSAPP_NUMBER =
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919876543210";
@@ -42,7 +43,7 @@ export function buildNewOrderAlertMessage(data: {
   notes?: string;
 }): string {
   const lines = [
-    "🛒 *NEW ORDER — Kartix*",
+    `🛒 *NEW ORDER — ${BRAND_NAME}*`,
     "",
     `*Order ID:* ${data.orderId}`,
     "",
@@ -105,7 +106,7 @@ export function buildOrderMessage(
   }
 
   const lines = [
-    "Hi! I'd like to place an order from *Kartix*:",
+    `Hi! I'd like to place an order from *${BRAND_NAME}*:`,
     "",
     ...items.map(
       (item, i) =>
@@ -168,7 +169,7 @@ export function buildOrderStatusUpdateMessage(
     delivered: {
       emoji: "🎉",
       headline: "Order Delivered",
-      body: "Your order has been delivered. Thank you for shopping with Kartix!",
+      body: `Your order has been delivered. Thank you for shopping with ${BRAND_NAME}!`,
     },
     cancelled: {
       emoji: "❌",
@@ -182,21 +183,21 @@ export function buildOrderStatusUpdateMessage(
     return [
       `Hi ${order.customerName}!`,
       "",
-      `Update on your Kartix order *${order.id}*:`,
+      `Update on your ${BRAND_NAME} order *${order.id}*:`,
       "",
       `*Status:* ${status}`,
       `*Total:* ${formatPrice(order.total)}`,
       "",
       trackUrl ? `Track your order: ${trackUrl}` : "",
       "",
-      "Thank you for shopping with Kartix!",
+      `Thank you for shopping with ${BRAND_NAME}!`,
     ]
       .filter(Boolean)
       .join("\n");
   }
 
   const lines = [
-    `${copy.emoji} *${copy.headline} — Kartix*`,
+    `${copy.emoji} *${copy.headline} — ${BRAND_NAME}*`,
     "",
     `Hi ${order.customerName}!`,
     "",
@@ -211,7 +212,7 @@ export function buildOrderStatusUpdateMessage(
     lines.push("", `Track your order anytime:`, trackUrl);
   }
 
-  lines.push("", "— Team Kartix");
+  lines.push("", `— Team ${BRAND_NAME}`);
   return lines.join("\n");
 }
 
@@ -220,7 +221,7 @@ export function shouldNotifyCustomerOnStatus(status: OrderStatus): boolean {
 }
 
 export function buildEnquiryMessage(): string {
-  return "Hi! I'm interested in gym supplements and imported products from Kartix. Can you help me?";
+  return `Hi! I'm interested in gym supplements and imported products from ${BRAND_NAME}. Can you help me?`;
 }
 
 export function getWhatsAppShareUrl(message: string): string {
@@ -229,7 +230,7 @@ export function getWhatsAppShareUrl(message: string): string {
 
 export function buildProductShareMessage(product: Product, url: string): string {
   const lines = [
-    `Check out *${product.name}* on Kartix!`,
+    `Check out *${product.name}* on ${BRAND_NAME}!`,
     "",
     `Price: ${formatPrice(product.price)}`,
   ];
@@ -248,7 +249,7 @@ export function buildProductShareMessage(product: Product, url: string): string 
     "",
     url,
     "",
-    "Shop gym supplements & imported products at Kartix!"
+    `Shop gym supplements & imported products at ${BRAND_NAME}!`
   );
 
   return lines.join("\n");

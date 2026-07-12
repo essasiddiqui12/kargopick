@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Loader2 } from "lucide-react";
+import { BRAND_NAME } from "@/lib/brand";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function AdminLoginPage() {
           </div>
           <h1 className="text-2xl font-bold text-surface-900">Admin Login</h1>
           <p className="mt-1 text-sm text-surface-500">
-            Sign in to manage your Kartix store
+            Sign in to manage your {BRAND_NAME} store
           </p>
         </div>
 
