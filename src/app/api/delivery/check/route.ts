@@ -16,17 +16,34 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    const { data, error } = await supabase
+
+    let { data, error } = await supabase
       .from("delivery_zones")
       .select("*")
       .eq("is_active", true)
-      .or(`pincode.eq.${pincode.trim()},pincode.like.${pincode.trim()}%`)
-      .order("pincode", { ascending: true })
-      .limit(5);
+      .eq("pincode", pincode.trim())
+      .limit(1);
 
     if (error) {
-      console.error("Delivery check error:", error);
+      console.error("Delivery check exact error:", error);
       throw new Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      const prefix = pincode.trim() + "%";
+      const result = await supabase
+        .from("delivery_zones")
+        .select("*")
+        .eq("is_active", true)
+        .like("pincode", prefix)
+        .order("pincode", { ascending: true })
+        .limit(5);
+
+      if (result.error) {
+        console.error("Delivery check prefix error:", result.error);
+        throw new Error(result.error.message);
+      }
+      data = result.data;
     }
 
     if (!data || data.length === 0) {
