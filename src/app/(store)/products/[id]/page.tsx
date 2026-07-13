@@ -4,7 +4,6 @@ import ProductDetailInfo, {
   ProductBreadcrumbs,
 } from "@/components/ProductDetailInfo";
 import RelatedProducts from "@/components/RelatedProducts";
-import PincodeChecker from "@/components/PincodeChecker";
 import { getProductById, getRelatedProducts } from "@/lib/products";
 
 export default async function ProductDetailPage({
@@ -35,9 +34,8 @@ export default async function ProductDetailPage({
           />
         </div>
 
-        <div className="min-w-0 flex flex-col gap-4">
+        <div className="min-w-0">
           <ProductDetailInfo product={product} />
-          <PincodeChecker className="w-full" />
         </div>
       </div>
 
