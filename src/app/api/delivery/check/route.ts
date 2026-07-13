@@ -68,13 +68,9 @@ export async function POST(request: NextRequest) {
         ? `Delivery to ${match.city} in ${match.delivery_days} day${match.delivery_days > 1 ? "s" : ""}.`
         : `Did you mean ${match.city} (${match.pincode})? Delivery in ${match.delivery_days} day${match.delivery_days > 1 ? "s" : ""}.`,
     });
-  } catch (err) {
-    console.error("Delivery check failed:", err);
+  } catch {
     return NextResponse.json(
-      {
-        error: "Failed to check delivery. Please try again.",
-        details: err instanceof Error ? err.message : "Unknown error",
-      },
+      { error: "Failed to check delivery. Please try again." },
       { status: 500 }
     );
   }
