@@ -16,11 +16,18 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    const { data, error } = await supabase.rpc("match_pincode", {
-      search: pincode.trim(),
-    });
+    const { data, error } = await supabase
+      .from("delivery_zones")
+      .select("*")
+      .eq("is_active", true)
+      .or(`pincode.eq.${pincode.trim()},pincode.like.${pincode.trim()}%`)
+      .order("pincode", { ascending: true })
+      .limit(5);
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("Delivery check error:", error);
+      throw new Error(error.message);
+    }
 
     if (!data || data.length === 0) {
       return NextResponse.json(
