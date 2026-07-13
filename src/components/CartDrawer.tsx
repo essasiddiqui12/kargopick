@@ -11,10 +11,10 @@ import {
   ShoppingBag,
   ArrowLeft,
   Loader2,
-  CheckCircle,
   AlertTriangle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
 import { formatPrice } from "@/data/products";
 import { buildOrderMessage, getWhatsAppUrl } from "@/lib/whatsapp";
 import {
@@ -38,15 +38,13 @@ export default function CartDrawer() {
     clearCart,
     syncItems,
   } = useCart();
+  const router = useRouter();
 
   const [step, setStep] = useState<Step>("cart");
   const [loading, setLoading] = useState(false);
   const [syncingStock, setSyncingStock] = useState(false);
   const [stockIssues, setStockIssues] = useState<CartStockIssue[]>([]);
   const [error, setError] = useState("");
-  const [orderId, setOrderId] = useState("");
-  const [orderPhone, setOrderPhone] = useState("");
-  const [whatsappUrl, setWhatsappUrl] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -128,9 +126,6 @@ export default function CartDrawer() {
   function resetAndClose() {
     setStep("cart");
     setError("");
-    setOrderId("");
-    setOrderPhone("");
-    setWhatsappUrl("");
     setAppliedCoupon(null);
     setStockIssues([]);
     setForm({ name: "", phone: "", address: "", notes: "" });
@@ -212,13 +207,11 @@ export default function CartDrawer() {
         )
       );
 
-      setOrderId(data.id);
-      setOrderPhone(form.phone);
-      setWhatsappUrl(url);
       clearCart();
       setAppliedCoupon(null);
       setStockIssues([]);
-      setStep("success");
+      setIsCartOpen(false);
+      router.push(`/order-confirmation/${data.id}`);
       window.open(url, "_blank");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -267,43 +260,7 @@ export default function CartDrawer() {
           </button>
         </div>
 
-        {step === "success" ? (
-          <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-            <CheckCircle className="h-16 w-16 text-brand-500 mb-4" />
-            <h3 className="text-xl font-bold text-surface-900">Order Placed!</h3>
-            <p className="mt-2 text-sm text-surface-500">
-              Order ID: <span className="font-semibold text-brand-600">{orderId}</span>
-            </p>
-            <p className="mt-2 text-sm text-surface-500">
-              WhatsApp should open with your order details. Tap <strong>Send</strong> to notify us — we&apos;ll confirm shortly!
-            </p>
-            {whatsappUrl && (
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-5 py-2.5 text-sm font-semibold text-[#128C7E] hover:bg-[#25D366]/20"
-              >
-                Open WhatsApp again
-              </a>
-            )}
-            {orderId && orderPhone && (
-              <Link
-                href={`/track-order?orderId=${encodeURIComponent(orderId)}&phone=${encodeURIComponent(orderPhone)}`}
-                onClick={resetAndClose}
-                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-700"
-              >
-                Track this order →
-              </Link>
-            )}
-            <button
-              onClick={resetAndClose}
-              className="mt-8 rounded-xl bg-brand-500 px-6 py-3 font-semibold text-white hover:bg-brand-600 transition-colors"
-            >
-              Continue Shopping
-            </button>
-          </div>
-        ) : step === "checkout" ? (
+        {step === "checkout" ? (
           <form
             onSubmit={handlePlaceOrder}
             className="flex flex-1 flex-col overflow-hidden"
