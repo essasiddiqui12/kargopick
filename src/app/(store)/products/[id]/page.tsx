@@ -4,6 +4,7 @@ import ProductDetailInfo, {
   ProductBreadcrumbs,
 } from "@/components/ProductDetailInfo";
 import RelatedProducts from "@/components/RelatedProducts";
+import ProductReviews from "@/components/ProductReviews";
 import { getProductById, getRelatedProducts } from "@/lib/products";
 
 export default async function ProductDetailPage({
@@ -40,6 +41,8 @@ export default async function ProductDetailPage({
       </div>
 
       <RelatedProducts products={related} categoryId={product.category} />
+
+      <ProductReviews productId={product.id} />
     </div>
   );
 }
