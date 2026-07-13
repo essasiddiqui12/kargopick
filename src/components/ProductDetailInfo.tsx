@@ -41,7 +41,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
     : 0;
 
   return (
-    <div className="lg:sticky lg:top-24 lg:self-start">
+    <div className="static lg:sticky lg:top-24 lg:self-start">
       <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-wrap items-center gap-2">
           {category && (

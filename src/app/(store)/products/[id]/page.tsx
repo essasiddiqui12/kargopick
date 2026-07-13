@@ -18,7 +18,7 @@ export default async function ProductDetailPage({
   const related = await getRelatedProducts(product.id, product.category);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10 w-full overflow-x-hidden">
       <ProductBreadcrumbs
         productName={product.name}
         categoryId={product.category}

@@ -8,7 +8,7 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
   const whatsappUrl = getWhatsAppUrl(buildEnquiryMessage());
   const phoneDisplay = formatWhatsAppDisplay();
   return (
-    <footer className="border-t border-surface-300/60 bg-white/60 backdrop-blur-sm mt-12 w-full">
+    <footer className="border-t border-surface-300/60 bg-white/60 backdrop-blur-sm mt-12 w-full relative">
       <div className="mx-auto px-4 py-12 sm:px-6 lg:px-8 max-w-7xl">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="md:col-span-1">

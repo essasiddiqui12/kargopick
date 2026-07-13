@@ -14,9 +14,9 @@ export default async function StoreLayout({
   const { logoUrl } = await getSiteSettings();
 
   return (
-    <div className="bg-mesh min-h-screen text-surface-800">
+    <div className="bg-mesh min-h-screen text-surface-800 flex flex-col overflow-x-hidden">
       <Header logoUrl={logoUrl} />
-      <main className="min-h-screen">{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer logoUrl={logoUrl} />
       <CartDrawer />
       <WhatsAppButton />
