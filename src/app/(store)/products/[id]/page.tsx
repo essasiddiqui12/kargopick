@@ -24,7 +24,7 @@ export default async function ProductDetailPage({
         categoryId={product.category}
       />
 
-      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 lg:items-start">
         <div className="rounded-2xl border border-surface-200 bg-white p-4 shadow-sm sm:p-5">
           <ProductGallery
             images={product.images}

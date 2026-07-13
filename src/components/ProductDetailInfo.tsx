@@ -42,7 +42,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
 
   return (
     <div className="static lg:sticky lg:top-24 lg:self-start">
-      <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-2xl border border-surface-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
         <div className="flex flex-wrap items-center gap-2">
           {category && (
             <Link
@@ -103,10 +103,12 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
           </p>
         </div>
 
-        <ProductDescription text={product.description} />
+        <div className="mt-4 sm:mt-6">
+          <ProductDescription text={product.description} />
+        </div>
 
         {(product.weight || product.origin) && (
-          <dl className="mt-6 grid grid-cols-2 gap-3 rounded-xl bg-surface-50 p-4 text-sm">
+          <dl className="mt-4 sm:mt-6 grid grid-cols-2 gap-3 rounded-xl bg-surface-50 p-3 sm:p-4 text-sm">
             {product.weight && (
               <div>
                 <dt className="text-xs font-medium uppercase tracking-wide text-surface-400">
@@ -130,7 +132,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
           </dl>
         )}
 
-        <ul className="mt-6 space-y-2.5 text-sm text-surface-600">
+        <ul className="mt-4 sm:mt-6 space-y-2 text-sm text-surface-600">
           <li className="flex items-center gap-2.5">
             <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-500" />
             Authentic supplements & imported products
@@ -145,7 +147,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
           </li>
         </ul>
 
-        <div className="mt-8 space-y-3 border-t border-surface-100 pt-6">
+        <div className="mt-6 sm:mt-8 space-y-3 border-t border-surface-100 pt-4 sm:pt-6">
           <AddToCartButton product={product} fullWidth />
           <WhatsAppShareButton product={product} fullWidth />
         </div>

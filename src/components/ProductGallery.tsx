@@ -27,18 +27,18 @@ export default function ProductGallery({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-50">
+    <div className="space-y-3">
+      <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden rounded-xl bg-surface-50">
         <Image
           src={activeImage}
           alt={name}
           fill
-          className="object-cover"
+          className="object-contain"
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
         {showBadge && badge && (
-          <span className="absolute left-4 top-4 rounded-full bg-brand-500 px-4 py-1.5 text-sm font-semibold text-white">
+          <span className="absolute left-3 top-3 rounded-full bg-brand-500 px-3 py-1 text-xs font-semibold text-white">
             {badge}
           </span>
         )}
@@ -51,7 +51,7 @@ export default function ProductGallery({
               key={`${url}-${index}`}
               type="button"
               onClick={() => setActiveIndex(index)}
-              className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
+              className={`relative h-14 w-14 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all ${
                 index === activeIndex
                   ? "border-brand-500 ring-2 ring-brand-200"
                   : "border-surface-200 hover:border-brand-300"
