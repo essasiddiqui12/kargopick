@@ -60,7 +60,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
           {stockPill(stockStatus, product.stock)}
         </div>
 
-        <h1 className="mt-4 text-2xl font-bold tracking-tight text-surface-900 sm:text-3xl">
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-surface-900 sm:text-3xl break-words">
           {product.name}
         </h1>
 
@@ -168,7 +168,7 @@ export function ProductBreadcrumbs({
   return (
     <nav
       aria-label="Breadcrumb"
-      className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-surface-500"
+      className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-surface-500 min-w-0"
     >
       <Link href="/" className="hover:text-brand-600 transition-colors">
         Home
@@ -189,7 +189,7 @@ export function ProductBreadcrumbs({
         </>
       )}
       <ChevronRight className="h-3.5 w-3.5 text-surface-300" />
-      <span className="font-medium text-surface-800 line-clamp-1">
+      <span className="font-medium text-surface-800 line-clamp-1 min-w-0">
         {productName}
       </span>
     </nav>

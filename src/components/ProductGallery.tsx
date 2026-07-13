@@ -70,7 +70,6 @@ export default function ProductGallery({
           fill
           className="object-contain"
           priority
-          sizes="(max-width: 1024px) 100vw, 50vw"
         />
         {showBadge && badge && (
           <span className="absolute left-3 top-3 rounded-full bg-brand-500 px-3 py-1 text-xs font-semibold text-white">
