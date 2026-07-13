@@ -5,6 +5,7 @@ import { categories, formatPrice } from "@/data/products";
 import { StockStatus, getStockStatus } from "@/lib/products";
 import AddToCartButton from "@/components/AddToCartButton";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
+import ProductDescription from "@/components/ProductDescription";
 
 function stockPill(status: StockStatus, stock: number) {
   if (status === "out_of_stock") {
@@ -102,9 +103,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
           </p>
         </div>
 
-        <p className="mt-6 text-surface-600 leading-relaxed text-[15px]">
-          {product.description}
-        </p>
+        <ProductDescription text={product.description} />
 
         {(product.weight || product.origin) && (
           <dl className="mt-6 grid grid-cols-2 gap-3 rounded-xl bg-surface-50 p-4 text-sm">
