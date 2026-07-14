@@ -6,24 +6,7 @@ import Image from "next/image";
 import { Eye } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { getRecentlyViewed } from "@/hooks/useRecentlyViewed";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice: number | null;
-  image: string;
-  badge: string | null;
-  rating: number;
-  reviews: number;
-  inStock: boolean;
-  stock: number;
-  weight: string | null;
-  category: string;
-  description: string;
-  origin: string | null;
-  images: string[];
-}
+import type { Product } from "@/types";
 
 export default function RecentlyViewed() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,8 +24,8 @@ export default function RecentlyViewed() {
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
         const res = await fetch(`${baseUrl}/api/products`);
         if (!res.ok) throw new Error("Failed");
-        const all = await res.json();
-        const filtered = all.filter((p: Product) => ids.includes(p.id)).slice(0, 4);
+        const all = await res.json() as Product[];
+        const filtered = all.filter((p) => ids.includes(p.id)).slice(0, 4);
         setProducts(filtered);
       } catch {
         // silently fail
