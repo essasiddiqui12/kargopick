@@ -9,9 +9,6 @@ export const dynamic = "force-dynamic";
 
 interface Banner {
   id: number;
-  title: string;
-  subtitle?: string;
-  cta_text?: string;
   cta_url: string;
   image_url: string;
   is_active: boolean;

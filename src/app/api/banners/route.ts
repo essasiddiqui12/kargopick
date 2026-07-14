@@ -25,9 +25,6 @@ export async function GET() {
       })
       .map((banner) => ({
         id: banner.id,
-        title: banner.title,
-        subtitle: banner.subtitle,
-        cta_text: banner.cta_text,
         cta_url: banner.cta_url,
         image_url: banner.desktop_image,
         is_active: banner.is_active,

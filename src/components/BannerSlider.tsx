@@ -7,9 +7,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Banner {
   id: number;
-  title: string;
-  subtitle?: string;
-  cta_text?: string;
   cta_url: string;
   image_url: string;
   is_active: boolean;
@@ -36,8 +33,6 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
 
   if (banners.length === 0) return null;
 
-  const banner = banners[current];
-
   return (
     <div
       className="relative w-full aspect-video md:aspect-[21/9] overflow-hidden group"
@@ -54,35 +49,12 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
         >
           <Image
             src={b.image_url}
-            alt={b.title || "Promotional banner"}
+            alt="Promotional banner"
             fill
             className="object-cover"
             priority={index === 0}
             sizes="100vw"
           />
-          {(b.title || b.subtitle) && (
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent flex items-center">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-                <div className="max-w-2xl">
-                  {b.title && (
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4 drop-shadow-lg">
-                      {b.title}
-                    </h2>
-                  )}
-                  {b.subtitle && (
-                    <p className="text-sm sm:text-base md:text-lg text-white/90 mb-4 sm:mb-6 md:mb-8 drop-shadow-md">
-                      {b.subtitle}
-                    </p>
-                  )}
-                  {b.cta_text && (
-                    <span className="inline-flex items-center gap-2 rounded-xl bg-white px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 text-sm sm:text-base font-semibold text-surface-900 shadow-lg">
-                      {b.cta_text}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
         </Link>
       ))}
 

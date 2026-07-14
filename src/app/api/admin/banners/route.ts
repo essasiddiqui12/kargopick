@@ -40,9 +40,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      title,
-      subtitle,
-      cta_text,
       cta_url,
       image_url,
       sort_order = 0,
@@ -51,9 +48,9 @@ export async function POST(request: NextRequest) {
       end_date,
     } = body;
 
-    if (!title || !cta_url || !image_url) {
+    if (!cta_url || !image_url) {
       return NextResponse.json(
-        { error: "Title, CTA URL, and image are required" },
+        { error: "Link URL and image are required" },
         { status: 400 }
       );
     }
@@ -62,9 +59,6 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from("promotional_banners")
       .insert({
-        title,
-        subtitle: subtitle || null,
-        cta_text: cta_text || null,
         cta_url,
         desktop_image: image_url,
         mobile_image: image_url,

@@ -36,9 +36,6 @@ export default function AdminBannersPage() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    title: "",
-    subtitle: "",
-    cta_text: "",
     cta_url: "",
     image_url: "",
     sort_order: 0,
@@ -68,9 +65,6 @@ export default function AdminBannersPage() {
 
   function resetForm() {
     setForm({
-      title: "",
-      subtitle: "",
-      cta_text: "",
       cta_url: "",
       image_url: "",
       sort_order: 0,
@@ -82,9 +76,6 @@ export default function AdminBannersPage() {
 
   function startEdit(banner: Banner) {
     setForm({
-      title: banner.title,
-      subtitle: banner.subtitle || "",
-      cta_text: banner.cta_text || "",
       cta_url: banner.cta_url,
       image_url: banner.image_url,
       sort_order: banner.sort_order,
@@ -129,8 +120,13 @@ export default function AdminBannersPage() {
         setSaving(false);
         return;
       }
+      if (!form.cta_url) {
+        alert("Please enter a link URL");
+        setSaving(false);
+        return;
+      }
 
-      const url = editing ? "/api/admin/banners" : "/api/admin/banners";
+      const url = "/api/admin/banners";
       const method = editing ? "PATCH" : "POST";
       const body = editing ? { ...form, id: editing.id } : form;
 
@@ -203,46 +199,22 @@ export default function AdminBannersPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Title</label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                  placeholder="Summer Sale 50% Off"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Subtitle</label>
-                <input
-                  type="text"
-                  value={form.subtitle}
-                  onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                  placeholder="Limited time offer"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">CTA Text</label>
-                <input
-                  type="text"
-                  value={form.cta_text}
-                  onChange={(e) => setForm({ ...form, cta_text: e.target.value })}
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                  placeholder="Shop Now"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Link URL</label>
+                <label className="block text-sm font-medium text-surface-700 mb-1">Link URL *</label>
                 <input
                   type="text"
                   value={form.cta_url}
                   onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
                   className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                   placeholder="/products or https://..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-surface-700 mb-1">Sort Order</label>
+                <input
+                  type="number"
+                  value={form.sort_order}
+                  onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
+                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                 />
               </div>
             </div>
@@ -274,16 +246,6 @@ export default function AdminBannersPage() {
                   </button>
                 </div>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Sort Order</label>
-              <input
-                type="number"
-                value={form.sort_order}
-                onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-              />
             </div>
 
             <div className="flex items-center gap-2">
@@ -350,16 +312,14 @@ export default function AdminBannersPage() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-surface-900">{banner.title}</h3>
                     {banner.is_active ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     ) : (
                       <XCircle className="h-4 w-4 text-surface-400" />
                     )}
                   </div>
-                  {banner.subtitle && <p className="text-sm text-surface-600 mb-1">{banner.subtitle}</p>}
-                  <p className="text-xs text-surface-500">
-                    {banner.cta_text || "No CTA"} → {banner.cta_url || "No link"}
+                  <p className="text-xs text-surface-500 break-all">
+                    {banner.cta_url || "No link"}
                   </p>
                 </div>
 
