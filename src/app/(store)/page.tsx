@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Shield, Truck, BadgeCheck } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import BannerSlider from "@/components/BannerSlider";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { categories } from "@/data/products";
 import { getFeaturedProducts } from "@/lib/products";
 
@@ -109,6 +110,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <RecentlyViewed />
     </>
   );
 }

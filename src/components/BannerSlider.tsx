@@ -94,14 +94,14 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); prev(); }}
-            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60 touch-manipulation"
+            className="hidden md:flex absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
           >
             <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
           </button>
           <button
             type="button"
             onClick={(e) => { e.preventDefault(); next(); }}
-            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60 touch-manipulation"
+            className="hidden md:flex absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
           >
             <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
           </button>
