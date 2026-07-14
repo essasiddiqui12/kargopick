@@ -9,18 +9,23 @@ export async function GET() {
     const { data, error } = await supabase
       .from("promotional_banners")
       .select("*")
-      .eq("is_active", true)
-      .gte("start_date", new Date().toISOString())
-      .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
+      .eq("is_active", true);
 
     if (error) {
       console.error("Banners fetch error:", error);
       return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
+    const now = new Date().toISOString();
+    const filtered = (data || []).filter((banner) => {
+      if (banner.start_date && banner.start_date > now) return false;
+      if (banner.end_date && banner.end_date < now) return false;
+      return true;
+    });
+
+    filtered.sort((a, b) => a.sort_order - b.sort_order || new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    return NextResponse.json(filtered);
   } catch {
     return NextResponse.json({ error: "Failed to fetch banners" }, { status: 500 });
   }
