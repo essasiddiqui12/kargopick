@@ -1,54 +1,52 @@
 import Link from "next/link";
 import { ArrowRight, Shield, Truck, BadgeCheck } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import BannerSlider from "@/components/BannerSlider";
 import { categories } from "@/data/products";
 import { getFeaturedProducts } from "@/lib/products";
+import { createAdminClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+interface Banner {
+  id: number;
+  title: string;
+  subtitle?: string;
+  cta_text?: string;
+  cta_url: string;
+  desktop_image: string;
+  mobile_image: string;
+  sort_order: number;
+}
 
 export default async function HomePage() {
   const featured = await getFeaturedProducts();
 
+  let banners: Banner[] = [];
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("promotional_banners")
+      .select("*")
+      .eq("is_active", true)
+      .gte("start_date", new Date().toISOString())
+      .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    banners = data || [];
+  } catch {
+    // silently fail - no banners will show
+  }
+
   return (
     <>
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-100/60 via-transparent to-accent-400/10" />
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand-200/30 blur-3xl" />
-        <div className="absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-accent-400/20 blur-3xl" />
+      {banners.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+          <BannerSlider banners={banners} />
+        </section>
+      )}
 
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-          <div className="max-w-2xl animate-fade-in-up">
-            <span className="inline-block rounded-full border border-brand-300 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700">
-              Premium Fitness Store
-            </span>
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-surface-900 sm:text-6xl">
-              Fuel Your{" "}
-              <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">
-                Fitness
-              </span>{" "}
-              Journey
-            </h1>
-            <p className="mt-6 text-lg text-surface-600 leading-relaxed">
-              Shop authentic gym supplements, premium proteins, and imported
-              products from China — all at unbeatable prices with fast delivery.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-6 py-3.5 font-semibold text-white hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/25"
-              >
-                Shop Now <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/products?category=imported"
-                className="inline-flex items-center gap-2 rounded-xl border border-surface-300 bg-white/70 px-6 py-3.5 font-semibold text-surface-700 hover:bg-white hover:border-brand-300 transition-colors backdrop-blur-sm"
-              >
-                Imported Deals
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-surface-200/80 bg-white/50 backdrop-blur-sm">
+      <section className="border-y border-surface-200/80 bg-white/50 backdrop-blur-sm mt-8">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:grid-cols-3">
             {[
