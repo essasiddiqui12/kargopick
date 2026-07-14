@@ -4,7 +4,7 @@ import ProductCard from "@/components/ProductCard";
 import BannerSlider from "@/components/BannerSlider";
 import { categories } from "@/data/products";
 import { getFeaturedProducts } from "@/lib/products";
-import { createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,18 @@ interface Banner {
 
 async function getBanners(): Promise<Banner[]> {
   try {
-    const supabase = createAdminClient();
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!url || !key) {
+      console.error("Missing Supabase env vars for banners");
+      return [];
+    }
+
+    const supabase = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
     const { data, error } = await supabase
       .from("promotional_banners")
       .select("*")
