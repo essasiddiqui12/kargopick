@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,6 +16,8 @@ interface Banner {
 export default function BannerSlider({ banners }: { banners: Banner[] }) {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % banners.length);
@@ -31,6 +33,32 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
     return () => clearInterval(timer);
   }, [banners.length, isPaused, next]);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsPaused(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        next();
+      } else {
+        prev();
+      }
+    }
+
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+    setIsPaused(false);
+  };
+
   if (banners.length === 0) return null;
 
   return (
@@ -38,6 +66,9 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
       className="relative w-full aspect-video md:aspect-[21/9] overflow-hidden group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {banners.map((b, index) => (
         <Link
@@ -62,13 +93,13 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
         <>
           <button
             onClick={(e) => { e.preventDefault(); prev(); }}
-            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
+            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60"
           >
             <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); next(); }}
-            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
+            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60"
           >
             <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
           </button>
