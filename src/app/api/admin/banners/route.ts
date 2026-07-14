@@ -44,17 +44,16 @@ export async function POST(request: NextRequest) {
       subtitle,
       cta_text,
       cta_url,
-      desktop_image,
-      mobile_image,
+      image_url,
       sort_order = 0,
       is_active = true,
       start_date,
       end_date,
     } = body;
 
-    if (!title || !cta_url || !desktop_image || !mobile_image) {
+    if (!title || !cta_url || !image_url) {
       return NextResponse.json(
-        { error: "Title, CTA URL, desktop image, and mobile image are required" },
+        { error: "Title, CTA URL, and image are required" },
         { status: 400 }
       );
     }
@@ -67,8 +66,8 @@ export async function POST(request: NextRequest) {
         subtitle: subtitle || null,
         cta_text: cta_text || null,
         cta_url,
-        desktop_image,
-        mobile_image,
+        desktop_image: image_url,
+        mobile_image: image_url,
         sort_order: Number(sort_order) || 0,
         is_active: Boolean(is_active),
         start_date: start_date || null,
@@ -94,16 +93,23 @@ export async function PATCH(request: NextRequest) {
     if (authError) return authError;
 
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id, image_url, ...updates } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Banner ID is required" }, { status: 400 });
     }
 
     const supabase = createAdminClient();
+    const updateData: Record<string, unknown> = { ...updates };
+
+    if (image_url) {
+      updateData.desktop_image = image_url;
+      updateData.mobile_image = image_url;
+    }
+
     const { data, error } = await supabase
       .from("promotional_banners")
-      .update(updates)
+      .update(updateData)
       .eq("id", Number(id))
       .select()
       .single();

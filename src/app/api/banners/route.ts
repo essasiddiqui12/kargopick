@@ -17,11 +17,23 @@ export async function GET() {
     }
 
     const now = new Date().toISOString();
-    const filtered = (data || []).filter((banner) => {
-      if (banner.start_date && banner.start_date > now) return false;
-      if (banner.end_date && banner.end_date < now) return false;
-      return true;
-    });
+    const filtered = (data || [])
+      .filter((banner) => {
+        if (banner.start_date && banner.start_date > now) return false;
+        if (banner.end_date && banner.end_date < now) return false;
+        return true;
+      })
+      .map((banner) => ({
+        id: banner.id,
+        title: banner.title,
+        subtitle: banner.subtitle,
+        cta_text: banner.cta_text,
+        cta_url: banner.cta_url,
+        image_url: banner.desktop_image,
+        is_active: banner.is_active,
+        sort_order: banner.sort_order,
+        created_at: banner.created_at,
+      }));
 
     filtered.sort((a, b) => a.sort_order - b.sort_order || new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 

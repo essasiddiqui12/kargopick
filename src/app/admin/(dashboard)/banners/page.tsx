@@ -9,10 +9,9 @@ import {
   Trash2,
   Loader2,
   ImageIcon,
-  GripVertical,
   CheckCircle2,
   XCircle,
-  Calendar,
+  X,
 } from "lucide-react";
 
 interface Banner {
@@ -21,12 +20,9 @@ interface Banner {
   subtitle?: string;
   cta_text?: string;
   cta_url: string;
-  desktop_image: string;
-  mobile_image: string;
-  sort_order: number;
+  image_url: string;
   is_active: boolean;
-  start_date?: string;
-  end_date?: string;
+  sort_order: number;
   created_at: string;
 }
 
@@ -36,6 +32,7 @@ export default function AdminBannersPage() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<Banner | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -43,12 +40,9 @@ export default function AdminBannersPage() {
     subtitle: "",
     cta_text: "",
     cta_url: "",
-    desktop_image: "",
-    mobile_image: "",
+    image_url: "",
     sort_order: 0,
     is_active: true,
-    start_date: "",
-    end_date: "",
   });
 
   async function fetchBanners() {
@@ -78,12 +72,9 @@ export default function AdminBannersPage() {
       subtitle: "",
       cta_text: "",
       cta_url: "",
-      desktop_image: "",
-      mobile_image: "",
+      image_url: "",
       sort_order: 0,
       is_active: true,
-      start_date: "",
-      end_date: "",
     });
     setEditing(null);
     setShowForm(false);
@@ -95,21 +86,50 @@ export default function AdminBannersPage() {
       subtitle: banner.subtitle || "",
       cta_text: banner.cta_text || "",
       cta_url: banner.cta_url,
-      desktop_image: banner.desktop_image,
-      mobile_image: banner.mobile_image,
+      image_url: banner.image_url,
       sort_order: banner.sort_order,
       is_active: banner.is_active,
-      start_date: banner.start_date ? banner.start_date.slice(0, 16) : "",
-      end_date: banner.end_date ? banner.end_date.slice(0, 16) : "",
     });
     setEditing(banner);
     setShowForm(true);
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "banners");
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+
+      setForm({ ...form, image_url: data.url });
+    } catch {
+      alert("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
+      if (!form.image_url) {
+        alert("Please upload an image");
+        setSaving(false);
+        return;
+      }
+
       const url = editing ? "/api/admin/banners" : "/api/admin/banners";
       const method = editing ? "PATCH" : "POST";
       const body = editing ? { ...form, id: editing.id } : form;
@@ -164,7 +184,7 @@ export default function AdminBannersPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-surface-900">Promotional Banners</h1>
-          <p className="mt-1 text-sm text-surface-500">Manage homepage banners and promotions</p>
+          <p className="mt-1 text-sm text-surface-500">Manage homepage banners</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
@@ -183,12 +203,11 @@ export default function AdminBannersPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Title *</label>
+                <label className="block text-sm font-medium text-surface-700 mb-1">Title</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  required
                   className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                   placeholder="Summer Sale 50% Off"
                 />
@@ -200,7 +219,7 @@ export default function AdminBannersPage() {
                   value={form.subtitle}
                   onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
                   className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                  placeholder="Limited time offer on all proteins"
+                  placeholder="Limited time offer"
                 />
               </div>
             </div>
@@ -217,81 +236,54 @@ export default function AdminBannersPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">CTA URL *</label>
+                <label className="block text-sm font-medium text-surface-700 mb-1">Link URL</label>
                 <input
                   type="text"
                   value={form.cta_url}
                   onChange={(e) => setForm({ ...form, cta_url: e.target.value })}
-                  required
                   className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
                   placeholder="/products or https://..."
                 />
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Desktop Image URL *</label>
-                <input
-                  type="text"
-                  value={form.desktop_image}
-                  onChange={(e) => setForm({ ...form, desktop_image: e.target.value })}
-                  required
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                  placeholder="https://..."
-                />
-                {form.desktop_image && (
-                  <div className="mt-2 relative h-32 rounded-lg overflow-hidden border border-surface-200">
-                    <NextImage src={form.desktop_image} alt="Desktop preview" fill className="object-cover" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Mobile Image URL *</label>
-                <input
-                  type="text"
-                  value={form.mobile_image}
-                  onChange={(e) => setForm({ ...form, mobile_image: e.target.value })}
-                  required
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                  placeholder="https://..."
-                />
-                {form.mobile_image && (
-                  <div className="mt-2 relative h-32 rounded-lg overflow-hidden border border-surface-200">
-                    <NextImage src={form.mobile_image} alt="Mobile preview" fill className="object-cover" />
-                  </div>
-                )}
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Banner Image *</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="mb-2 block w-full text-sm text-surface-600 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+              />
+              {uploading && (
+                <div className="flex items-center gap-2 text-sm text-surface-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Uploading...
+                </div>
+              )}
+              {form.image_url && (
+                <div className="mt-3 relative h-48 w-full overflow-hidden rounded-lg border border-surface-200">
+                  <NextImage src={form.image_url} alt="Banner preview" fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, image_url: "" })}
+                    className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Sort Order</label>
-                <input
-                  type="number"
-                  value={form.sort_order}
-                  onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Start Date</label>
-                <input
-                  type="datetime-local"
-                  value={form.start_date}
-                  onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">End Date</label>
-                <input
-                  type="datetime-local"
-                  value={form.end_date}
-                  onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-                  className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Sort Order</label>
+              <input
+                type="number"
+                value={form.sort_order}
+                onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
+                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              />
             </div>
 
             <div className="flex items-center gap-2">
@@ -334,7 +326,7 @@ export default function AdminBannersPage() {
       ) : banners.length === 0 ? (
         <div className="rounded-2xl border border-surface-200 bg-white p-12 text-center">
           <ImageIcon className="h-12 w-12 text-surface-300 mx-auto mb-4" />
-          <p className="text-surface-500">No banners yet. Create your first promotional banner above.</p>
+          <p className="text-surface-500">No banners yet. Create your first banner above.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -347,16 +339,12 @@ export default function AdminBannersPage() {
             >
               <div className="flex flex-wrap items-start gap-4">
                 <div className="flex flex-col items-center gap-1 pt-1">
-                  <GripVertical className="h-5 w-5 text-surface-300" />
                   <span className="text-xs font-mono text-surface-400">#{banner.sort_order}</span>
                 </div>
 
-                <div className="flex gap-3 flex-shrink-0">
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-lg border border-surface-200 bg-surface-100">
-                    <NextImage src={banner.desktop_image} alt="Desktop" fill className="object-cover" />
-                  </div>
-                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-lg border border-surface-200 bg-surface-100">
-                    <NextImage src={banner.mobile_image} alt="Mobile" fill className="object-cover" />
+                <div className="flex-shrink-0">
+                  <div className="relative h-24 w-48 sm:h-32 sm:w-64 overflow-hidden rounded-lg border border-surface-200 bg-surface-100">
+                    <NextImage src={banner.image_url} alt={banner.title} fill className="object-cover" />
                   </div>
                 </div>
 
@@ -368,16 +356,10 @@ export default function AdminBannersPage() {
                     ) : (
                       <XCircle className="h-4 w-4 text-surface-400" />
                     )}
-                    {banner.start_date || banner.end_date ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
-                        <Calendar className="h-3 w-3" />
-                        Scheduled
-                      </span>
-                    ) : null}
                   </div>
                   {banner.subtitle && <p className="text-sm text-surface-600 mb-1">{banner.subtitle}</p>}
                   <p className="text-xs text-surface-500">
-                    CTA: {banner.cta_text || "No text"} → {banner.cta_url}
+                    {banner.cta_text || "No CTA"} → {banner.cta_url || "No link"}
                   </p>
                 </div>
 

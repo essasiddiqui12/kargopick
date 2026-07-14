@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const folder = (formData.get("folder") as string | null) || "products";
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -35,12 +36,13 @@ export async function POST(request: NextRequest) {
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path = folder === "products" ? filename : `${folder}/${filename}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const supabase = createAdminClient();
     const { error: uploadError } = await supabase.storage
       .from("products")
-      .upload(filename, buffer, {
+      .upload(path, buffer, {
         contentType: file.type,
         upsert: false,
       });
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from("products").getPublicUrl(filename);
+    } = supabase.storage.from("products").getPublicUrl(path);
 
     return NextResponse.json({ url: publicUrl });
   } catch (err) {
