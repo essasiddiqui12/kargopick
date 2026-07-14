@@ -411,14 +411,14 @@ export default function CartDrawer() {
                         : "border-surface-200 bg-surface-50"
                     }`}
                   >
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
-                      <Image
-                        src={item.product.image}
-                        alt={item.product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
+                       <Image
+                         src={item.product.image}
+                         alt={item.product.name}
+                         fill
+                         className="object-contain"
+                       />
+                     </div>
                     <div className="flex flex-1 flex-col min-w-0">
                       <h3 className="font-medium text-sm text-surface-900 line-clamp-1">
                         {item.product.name}

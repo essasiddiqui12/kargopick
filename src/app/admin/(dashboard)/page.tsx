@@ -195,14 +195,14 @@ export default async function AdminDashboard() {
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+                     <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
+                       <Image
+                         src={product.image}
+                         alt={product.name}
+                         fill
+                         className="object-contain"
+                       />
+                     </div>
                       <div>
                         <p className="font-medium text-surface-900 line-clamp-1">
                           {product.name}
