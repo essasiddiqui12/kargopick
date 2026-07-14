@@ -6,6 +6,7 @@ import { Product, Category } from "@/types";
 import { categories } from "@/data/products";
 import { Loader2 } from "lucide-react";
 import MultiImageUploadField from "@/components/admin/MultiImageUploadField";
+import VideoUploadField from "@/components/admin/VideoUploadField";
 import { LowStockHint } from "@/components/admin/StockStatusBadge";
 
 interface ProductFormProps {
@@ -20,6 +21,7 @@ const emptyForm = {
   originalPrice: "",
   category: "protein" as Category,
   images: [] as string[],
+  videos: [] as string[],
   badge: "",
   rating: "4.5",
   reviews: "0",
@@ -48,6 +50,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
           : initialData.image
             ? [initialData.image]
             : [],
+      videos: (initialData as Product & { videos?: string[] }).videos || [],
       badge: initialData.badge || "",
       rating: String(initialData.rating),
       reviews: String(initialData.reviews),
@@ -83,6 +86,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
       category: form.category,
       image: form.images[0],
       images: form.images,
+      videos: form.videos,
       badge: form.badge || undefined,
       rating: parseFloat(form.rating),
       reviews: parseInt(form.reviews, 10),
@@ -201,15 +205,28 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
           />
         </div>
 
-        <div className="sm:col-span-2">
-          <label className={labelClass}>Product Images *</label>
-          <MultiImageUploadField
-            value={form.images}
-            onChange={(urls) =>
-              setForm((prev) => ({ ...prev, images: urls }))
-            }
-          />
-        </div>
+      <div className="sm:col-span-2">
+        <label className={labelClass}>Product Images *</label>
+        <MultiImageUploadField
+          value={form.images}
+          onChange={(urls) =>
+            setForm((prev) => ({ ...prev, images: urls }))
+          }
+        />
+      </div>
+
+      <div className="sm:col-span-2">
+        <label className={labelClass}>Product Videos (optional)</label>
+        <VideoUploadField
+          value={form.videos}
+          onChange={(urls) =>
+            setForm((prev) => ({ ...prev, videos: urls }))
+          }
+        />
+        <p className="text-xs text-surface-400 mt-1">
+          Supported formats: MP4, WebM. Max size: 50MB per video.
+        </p>
+      </div>
 
         <div>
           <label className={labelClass}>Weight / Size</label>

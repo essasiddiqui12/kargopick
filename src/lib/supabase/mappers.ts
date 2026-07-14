@@ -2,20 +2,26 @@ import { Product, Coupon, Order, OrderItem, OrderStatus } from "@/types";
 
 export function normalizeProductImages(
   image?: string,
-  images?: string[] | null
-): { image: string; images: string[] } {
-  const list = (images ?? []).filter(Boolean);
-  if (list.length > 0) {
-    return { image: list[0], images: list };
+  images?: string[] | null,
+  videos?: string[] | null
+): { image: string; images: string[]; videos: string[] } {
+  const imageList = (images ?? []).filter(Boolean);
+  const videoList = (videos ?? []).filter(Boolean);
+  if (imageList.length > 0) {
+    return { image: imageList[0], images: imageList, videos: videoList };
   }
   if (image) {
-    return { image, images: [image] };
+    return { image, images: [image], videos: videoList };
   }
-  return { image: "", images: [] };
+  return { image: "", images: [], videos: videoList };
 }
 
 export function productToRow(product: Partial<Product> & { id?: string }) {
-  const { image, images } = normalizeProductImages(product.image, product.images);
+  const { image, images, videos } = normalizeProductImages(
+    product.image,
+    product.images,
+    product.videos
+  );
 
   return {
     id: product.id,
@@ -26,6 +32,7 @@ export function productToRow(product: Partial<Product> & { id?: string }) {
     category: product.category,
     image,
     images,
+    videos,
     badge: product.badge ?? null,
     rating: product.rating,
     reviews: product.reviews,
@@ -37,9 +44,10 @@ export function productToRow(product: Partial<Product> & { id?: string }) {
 }
 
 export function rowToProduct(row: Record<string, unknown>): Product {
-  const { image, images } = normalizeProductImages(
+  const { image, images, videos } = normalizeProductImages(
     row.image as string,
-    row.images as string[] | null
+    row.images as string[] | null,
+    row.videos as string[] | null
   );
 
   return {
@@ -53,6 +61,7 @@ export function rowToProduct(row: Record<string, unknown>): Product {
     category: row.category as Product["category"],
     image,
     images,
+    videos,
     badge: (row.badge as string) || undefined,
     rating: Number(row.rating),
     reviews: Number(row.reviews),
