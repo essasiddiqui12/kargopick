@@ -75,7 +75,7 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
           key={b.id}
           href={b.cta_url || "#"}
           className={`absolute inset-0 transition-opacity duration-700 ${
-            index === current ? "opacity-100 z-10" : "opacity-0 z-0"
+            index === current ? "opacity-100 z-10 pointer-events-auto" : "opacity-0 z-0 pointer-events-none"
           }`}
         >
           <Image
@@ -92,14 +92,16 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
       {banners.length > 1 && (
         <>
           <button
+            type="button"
             onClick={(e) => { e.preventDefault(); prev(); }}
-            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60"
+            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60 touch-manipulation"
           >
             <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
           </button>
           <button
+            type="button"
             onClick={(e) => { e.preventDefault(); next(); }}
-            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60"
+            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-black/60 touch-manipulation"
           >
             <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
           </button>
@@ -108,8 +110,9 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
             {banners.map((_, index) => (
               <button
                 key={index}
+                type="button"
                 onClick={(e) => { e.preventDefault(); setCurrent(index); }}
-                className={`h-2.5 w-2.5 rounded-full transition-all ${
+                className={`h-2.5 w-2.5 rounded-full transition-all touch-manipulation ${
                   index === current
                     ? "bg-white w-8"
                     : "bg-white/50 hover:bg-white/80"
