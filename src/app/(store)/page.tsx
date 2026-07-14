@@ -25,15 +25,23 @@ export default async function HomePage() {
   let banners: Banner[] = [];
   try {
     const supabase = createAdminClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("promotional_banners")
       .select("*")
       .eq("is_active", true)
-      .gte("start_date", new Date().toISOString())
-      .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
-    banners = data || [];
+
+    if (error) {
+      console.error("Homepage banners fetch error:", error);
+    } else {
+      const now = new Date().toISOString();
+      banners = (data || []).filter((banner) => {
+        if (banner.start_date && banner.start_date > now) return false;
+        if (banner.end_date && banner.end_date < now) return false;
+        return true;
+      });
+    }
   } catch {
     // silently fail - no banners will show
   }
