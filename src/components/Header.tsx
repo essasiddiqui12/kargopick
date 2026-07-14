@@ -23,7 +23,7 @@ export default function Header({ logoUrl }: { logoUrl?: string | null }) {
     <header className="sticky top-0 z-50 border-b border-surface-300/60 bg-white/70 backdrop-blur-xl shadow-sm shadow-brand-500/5">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="group">
-          <SiteLogo logoUrl={logoUrl} />
+          <SiteLogo logoUrl={logoUrl} size="lg" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">

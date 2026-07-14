@@ -13,7 +13,7 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
         <div className="grid gap-8 md:grid-cols-4">
           <div className="md:col-span-1">
             <div className="mb-4">
-              <SiteLogo logoUrl={logoUrl} size="sm" />
+               <SiteLogo logoUrl={logoUrl} size="md" />
             </div>
             <p className="text-sm text-surface-600 leading-relaxed">
               Your trusted source for premium gym supplements, proteins, and
