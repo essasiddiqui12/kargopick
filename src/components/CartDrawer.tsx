@@ -24,6 +24,7 @@ import {
 } from "@/lib/cart-stock";
 import CouponInput, { OrderTotals } from "@/components/CouponInput";
 import { AppliedCoupon } from "@/types";
+import PincodeCheck from "@/components/PincodeCheck";
 
 type Step = "cart" | "checkout" | "success";
 
@@ -312,6 +313,17 @@ export default function CartDrawer() {
                   placeholder="House no, street, city, pincode"
                 />
               </div>
+
+              <PincodeCheck
+                onCheck={(result) => {
+                  if (!result.available && result.message) {
+                    setError(result.message);
+                  } else {
+                    setError("");
+                  }
+                }}
+                disabled={loading}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-surface-700 mb-1">
