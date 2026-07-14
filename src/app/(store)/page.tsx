@@ -4,7 +4,6 @@ import ProductCard from "@/components/ProductCard";
 import BannerSlider from "@/components/BannerSlider";
 import { categories } from "@/data/products";
 import { getFeaturedProducts } from "@/lib/products";
-import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -24,23 +23,12 @@ export default async function HomePage() {
 
   let banners: Banner[] = [];
   try {
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("promotional_banners")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Homepage banners fetch error:", error);
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
+    const res = await fetch(`${baseUrl}/api/banners`, { next: { revalidate: 60 } });
+    if (res.ok) {
+      banners = await res.json();
     } else {
-      const now = new Date().toISOString();
-      banners = (data || []).filter((banner) => {
-        if (banner.start_date && banner.start_date > now) return false;
-        if (banner.end_date && banner.end_date < now) return false;
-        return true;
-      });
+      console.error("Homepage banners API error:", res.status, await res.text());
     }
   } catch {
     // silently fail - no banners will show
