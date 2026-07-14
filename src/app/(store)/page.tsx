@@ -4,7 +4,6 @@ import ProductCard from "@/components/ProductCard";
 import BannerSlider from "@/components/BannerSlider";
 import { categories } from "@/data/products";
 import { getFeaturedProducts } from "@/lib/products";
-import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -21,36 +20,18 @@ interface Banner {
 
 async function getBanners(): Promise<Banner[]> {
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!url || !key) {
-      console.error("Missing Supabase env vars for banners");
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
+    const res = await fetch(`${baseUrl}/api/banners`, { 
+      next: { revalidate: 60 },
+      headers: { "Accept": "application/json" }
+    });
+    
+    if (!res.ok) {
+      console.error("Banners API responded with status:", res.status);
       return [];
     }
-
-    const supabase = createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
-
-    const { data, error } = await supabase
-      .from("promotional_banners")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Homepage banners fetch error:", error);
-      return [];
-    }
-
-    const now = new Date().toISOString();
-    return (data || []).filter((banner) => {
-      if (banner.start_date && banner.start_date > now) return false;
-      if (banner.end_date && banner.end_date < now) return false;
-      return true;
-    });
+    
+    return await res.json();
   } catch {
     return [];
   }
