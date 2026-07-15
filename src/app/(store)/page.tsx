@@ -152,7 +152,7 @@ export default async function HomePage() {
             Find exactly what your body needs
           </p>
         </div>
-        <div className="relative grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
+        <div className="relative grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
           {categories
             .filter((cat) => cat.is_active)
             .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
