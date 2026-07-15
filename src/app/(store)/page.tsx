@@ -118,15 +118,15 @@ export default async function HomePage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="group relative flex items-center gap-4 sm:gap-5 rounded-xl sm:rounded-2xl border border-surface-200 bg-white/80 p-3 sm:p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/10 hover:border-brand-300 hover:-translate-y-1"
+                className="group flex flex-col items-center text-center rounded-xl sm:rounded-2xl border border-surface-200 bg-white/80 p-3 sm:p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/10 hover:border-brand-300 hover:-translate-y-1"
               >
                 <div
                   className={`flex h-10 w-10 sm:h-14 sm:w-14 flex-shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br ${item.color} text-white shadow-md sm:shadow-lg shadow-brand-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl`}
                 >
                   <item.icon className="h-5 w-5 sm:h-7 sm:w-7" />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-surface-900 text-xs sm:text-base sm:text-lg tracking-tight leading-tight sm:leading-tight">
+                <div className="mt-2 sm:mt-3 min-w-0">
+                  <h3 className="font-bold text-surface-900 text-xs sm:text-base sm:text-lg leading-tight sm:leading-tight">
                     {item.title}
                   </h3>
                   <p className="mt-0.5 text-[11px] sm:text-sm text-surface-500 leading-relaxed hidden sm:block">

@@ -46,7 +46,7 @@ export default function RecentlyViewed() {
           <Eye className="h-5 w-5 text-brand-600" />
           <h2 className="text-2xl font-bold text-surface-900 sm:text-3xl">Recently Viewed</h2>
         </div>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
