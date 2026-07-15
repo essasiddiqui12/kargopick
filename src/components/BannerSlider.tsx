@@ -63,7 +63,7 @@ export default function BannerSlider({ banners }: { banners: Banner[] }) {
 
   return (
     <div
-      className="relative w-full aspect-video md:aspect-[21/9] overflow-hidden group"
+      className="relative w-full aspect-[2/1] md:aspect-[3/1] overflow-hidden group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}

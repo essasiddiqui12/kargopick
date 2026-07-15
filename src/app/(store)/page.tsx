@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ArrowRight, Shield, Truck, BadgeCheck } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import BannerSlider from "@/components/BannerSlider";
+import CategoryCard from "@/components/CategoryCard";
 import RecentlyViewed from "@/components/RecentlyViewed";
-import { categories } from "@/data/products";
+import { categories as staticCategories } from "@/data/products";
 import { getFeaturedProducts } from "@/lib/products";
+import type { CategoryInfo } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -35,9 +37,43 @@ async function getBanners(): Promise<Banner[]> {
   }
 }
 
+async function getCategories(): Promise<CategoryInfo[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
+    const res = await fetch(`${baseUrl}/api/categories`, {
+      cache: "no-store",
+      headers: { "Accept": "application/json" },
+    });
+
+    if (!res.ok) {
+      console.error("Categories API responded with status:", res.status);
+      return staticCategories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description,
+        icon: cat.icon,
+        sort_order: 0,
+        is_active: true,
+      }));
+    }
+
+    return await res.json();
+  } catch {
+    return staticCategories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      description: cat.description,
+      icon: cat.icon,
+      sort_order: 0,
+      is_active: true,
+    }));
+  }
+}
+
 export default async function HomePage() {
   const featured = await getFeaturedProducts();
   const banners = await getBanners();
+  const categories = await getCategories();
 
   return (
     <>
@@ -70,22 +106,21 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-surface-900 sm:text-3xl">Shop by Category</h2>
-        <p className="mt-2 text-surface-500">Find exactly what your body needs</p>
-        <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/products?category=${cat.id}`}
-              className="group rounded-2xl border border-surface-200 bg-white/70 p-6 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-500/10 transition-all backdrop-blur-sm"
-            >
-              <span className="text-3xl">{cat.icon}</span>
-              <h3 className="mt-4 text-lg font-semibold text-surface-900 group-hover:text-brand-600 transition-colors">
-                {cat.name}
-              </h3>
-              <p className="mt-2 text-sm text-surface-500">{cat.description}</p>
-            </Link>
-          ))}
+        <div className="text-center mb-10 sm:mb-14">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-surface-900">
+            Shop by Category
+          </h2>
+          <p className="mt-3 text-base sm:text-lg text-surface-500 max-w-2xl mx-auto">
+            Find exactly what your body needs
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+          {categories
+            .filter((cat) => cat.is_active)
+            .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
+            .map((category) => (
+              <CategoryCard key={category.id} category={category} />
+            ))}
         </div>
       </section>
 

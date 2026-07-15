@@ -1,4 +1,4 @@
-export type Category = "protein" | "supplements" | "imported";
+export type Category = string;
 
 export type OrderStatus =
   | "pending"
@@ -32,10 +32,13 @@ export interface CartItem {
 }
 
 export interface CategoryInfo {
-  id: Category;
+  id: string;
   name: string;
   description: string;
   icon: string;
+  image_url?: string;
+  sort_order: number;
+  is_active: boolean;
 }
 
 export interface OrderItem {
