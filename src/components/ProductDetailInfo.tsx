@@ -1,16 +1,11 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Star, ShieldCheck, MessageCircle, Truck } from "lucide-react";
-import { Product, ProductVariation } from "@/types";
+import { Product } from "@/types";
 import { categories, formatPrice } from "@/data/products";
 import { StockStatus, getStockStatus } from "@/lib/products";
 import AddToCartButton from "@/components/AddToCartButton";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import ProductDescription from "@/components/ProductDescription";
-import VariationSelector from "@/components/VariationSelector";
 
 function stockPill(status: StockStatus, stock: number) {
   if (status === "out_of_stock") {
@@ -34,7 +29,7 @@ function stockPill(status: StockStatus, stock: number) {
   );
 }
 
-export default function ProductDetailInfo({ product }: { product: Product & { variations?: ProductVariation[] } }) {
+export default function ProductDetailInfo({ product }: { product: Product }) {
   const category = categories.find((c) => c.id === product.category);
   const stockStatus = getStockStatus(product);
   const hasDiscount =
@@ -44,19 +39,6 @@ export default function ProductDetailInfo({ product }: { product: Product & { va
         ((product.originalPrice! - product.price) / product.originalPrice!) * 100
       )
     : 0;
-
-  const [selectedVariation, setSelectedVariation] = useState<ProductVariation | undefined>(undefined);
-
-  useEffect(() => {
-    if (product.variations && product.variations.length > 0) {
-      const defaultVariation = product.variations.find((v) => v.isDefault) || product.variations[0];
-      setSelectedVariation(defaultVariation);
-    }
-  }, [product.variations]);
-
-  const currentPrice = selectedVariation
-    ? product.price + selectedVariation.priceAdjustment
-    : product.price;
 
   return (
     <div className="static lg:sticky lg:top-24 lg:self-start">
@@ -102,8 +84,8 @@ export default function ProductDetailInfo({ product }: { product: Product & { va
 
         <div className="mt-6 border-t border-surface-100 pt-6">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-3xl font-bold text-brand-600" id="product-price">
-              {formatPrice(currentPrice)}
+            <span className="text-3xl font-bold text-brand-600">
+              {formatPrice(product.price)}
             </span>
             {hasDiscount && (
               <>
@@ -166,15 +148,7 @@ export default function ProductDetailInfo({ product }: { product: Product & { va
         </ul>
 
         <div className="mt-6 sm:mt-8 space-y-3 border-t border-surface-100 pt-4 sm:pt-6">
-          <VariationSelector
-            product={product}
-            onSelectionChange={(variation) => {
-              if (variation) {
-                setSelectedVariation(variation);
-              }
-            }}
-          />
-          <AddToCartButton product={product} variation={selectedVariation} fullWidth />
+          <AddToCartButton product={product} fullWidth />
           <WhatsAppShareButton product={product} fullWidth />
         </div>
       </div>

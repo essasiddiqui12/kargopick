@@ -2,19 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Product, Category, ProductVariation } from "@/types";
+import { Product, Category } from "@/types";
 import { categories } from "@/data/products";
 import { Loader2 } from "lucide-react";
 import MultiImageUploadField from "@/components/admin/MultiImageUploadField";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import { LowStockHint } from "@/components/admin/StockStatusBadge";
-import VariationForm from "@/components/admin/VariationForm";
 
 interface ProductFormProps {
   initialData?: Product;
   isEdit?: boolean;
-  onProductCreated?: (productId: string) => void;
-  disabled?: boolean;
 }
 
 const emptyForm = {
@@ -35,33 +32,12 @@ const emptyForm = {
   origin: "",
 };
 
-export default function ProductForm({ initialData, isEdit, onProductCreated, disabled }: ProductFormProps) {
+export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
-  const [variations, setVariations] = useState<ProductVariation[]>([]);
-
-  useEffect(() => {
-    async function fetchVariations() {
-      if (!initialData?.id) return;
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
-        const res = await fetch(`${baseUrl}/api/products/${initialData.id}/variations`, {
-          cache: "no-store",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setVariations(data);
-        }
-      } catch {
-        // silently fail
-      }
-    }
-
-    fetchVariations();
-  }, [initialData?.id]);
 
   const [form, setForm] = useState(() => {
     if (!initialData) return emptyForm;
@@ -168,12 +144,6 @@ export default function ProductForm({ initialData, isEdit, onProductCreated, dis
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to save product");
-      }
-
-      if (!isEdit) {
-        const data = await res.json();
-        onProductCreated?.(data.id);
-        return;
       }
 
       router.push("/admin");
@@ -391,16 +361,6 @@ export default function ProductForm({ initialData, isEdit, onProductCreated, dis
             )}
           </p>
         </div>
-
-        {isEdit && initialData && (
-          <div className="sm:col-span-2 border-t border-surface-200 pt-6">
-            <VariationForm
-              productId={initialData.id}
-              variations={variations}
-              onChange={setVariations}
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex gap-3 pt-2">

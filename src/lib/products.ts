@@ -1,6 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { productToRow, rowToProduct } from "@/lib/supabase/mappers";
-import { rowToVariation } from "@/lib/supabase/variation-mappers";
 import { OrderItem, Product, ProductFilters } from "@/types";
 
 export const LOW_STOCK_THRESHOLD = Number(
@@ -66,22 +65,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
     .maybeSingle();
 
   if (error) throw new Error(error.message);
-  if (!data) return undefined;
-
-  const product = normalizeProduct(rowToProduct(data));
-
-  const { data: variationsData } = await supabase
-    .from("product_variations")
-    .select("*")
-    .eq("product_id", id)
-    .eq("is_active", true)
-    .order("type", { ascending: true })
-    .order("sort_order", { ascending: true });
-
-  return {
-    ...product,
-    variations: (variationsData ?? []).map((v) => rowToVariation(v)),
-  };
+  return data ? normalizeProduct(rowToProduct(data)) : undefined;
 }
 
 export async function getProductsByCategory(
@@ -235,7 +219,6 @@ export async function deleteProduct(id: string): Promise<boolean> {
 }
 
 export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
-  const supabase = createAdminClient();
   const products = await getProducts();
 
   for (const item of items) {
@@ -243,37 +226,24 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
     if (!product) {
       throw new Error(`Product not found: ${item.name}`);
     }
-
-    if (item.variationId) {
-      const variation = product.variations?.find((v) => v.id === item.variationId);
-      if (!variation) {
-        throw new Error(`Variation not found: ${item.variationName}`);
-      }
-      if (variation.stock < item.quantity) {
-        throw new Error(
-          `Insufficient stock for ${product.name} - ${variation.value}. Only ${variation.stock} left.`
-        );
-      }
-      const newStock = Math.max(0, variation.stock - item.quantity);
-      const { error } = await supabase
-        .from("product_variations")
-        .update({ stock: newStock, is_active: newStock > 0 })
-        .eq("id", item.variationId);
-
-      if (error) throw new Error(error.message);
-    } else {
-      if (product.stock < item.quantity) {
-        throw new Error(
-          `Insufficient stock for ${product.name}. Only ${product.stock} left.`
-        );
-      }
-      const stock = Math.max(0, product.stock - item.quantity);
-      const { error } = await supabase
-        .from("products")
-        .update({ stock, in_stock: stock > 0 })
-        .eq("id", item.productId);
-
-      if (error) throw new Error(error.message);
+    if (product.stock < item.quantity) {
+      throw new Error(
+        `Insufficient stock for ${product.name}. Only ${product.stock} left.`
+      );
     }
+  }
+
+  const supabase = createAdminClient();
+
+  for (const item of items) {
+    const product = products.find((p) => p.id === item.productId);
+    if (!product) continue;
+    const stock = Math.max(0, product.stock - item.quantity);
+    const { error } = await supabase
+      .from("products")
+      .update({ stock, in_stock: stock > 0 })
+      .eq("id", item.productId);
+
+    if (error) throw new Error(error.message);
   }
 }
