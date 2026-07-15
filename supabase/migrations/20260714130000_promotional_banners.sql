@@ -16,6 +16,8 @@ create table if not exists public.promotional_banners (
 
 alter table public.promotional_banners enable row level security;
 
+drop policy if exists "banners_public_read_active" on public.promotional_banners;
+
 create policy "banners_public_read_active"
   on public.promotional_banners
   for select

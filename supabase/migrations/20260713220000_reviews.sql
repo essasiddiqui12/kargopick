@@ -10,6 +10,9 @@ create table if not exists public.reviews (
 
 alter table public.reviews enable row level security;
 
+drop policy if exists "reviews_public_read_approved" on public.reviews;
+drop policy if exists "reviews_public_insert" on public.reviews;
+
 create policy "reviews_public_read_approved"
   on public.reviews
   for select
