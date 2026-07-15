@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Search, SlidersHorizontal, X, Loader2 } from "lucide-react";
 import { categories } from "@/data/products";
 
 export default function ProductFilters() {
@@ -11,9 +11,45 @@ export default function ProductFilters() {
 
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState(searchParams.get("q") || "");
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+
+  const currentCategory = searchParams.get("category") || "all";
+  const currentSubcategory = searchParams.get("subcategory") || "";
+
+  useEffect(() => {
+    async function fetchSubcategories() {
+      if (currentCategory === "all") {
+        setSubcategories([]);
+        return;
+      }
+
+      setLoadingSubcategories(true);
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
+        const res = await fetch(`${baseUrl}/api/subcategories/${currentCategory}`, {
+          cache: "no-store",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setSubcategories(data);
+        } else {
+          setSubcategories([]);
+        }
+      } catch {
+        setSubcategories([]);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    }
+
+    fetchSubcategories();
+  }, [currentCategory]);
 
   const current = {
-    category: searchParams.get("category") || "all",
+    category: currentCategory,
+    subcategory: currentSubcategory,
     q: searchParams.get("q") || "",
     min: searchParams.get("min") || "",
     max: searchParams.get("max") || "",
@@ -44,7 +80,7 @@ export default function ProductFilters() {
   }
 
   const hasActiveFilters =
-    current.q || current.min || current.max || current.stock !== "all" || current.sort;
+    current.q || current.min || current.max || current.stock !== "all" || current.sort || current.subcategory;
 
   return (
     <div className="mb-8 space-y-4">
@@ -81,7 +117,7 @@ export default function ProductFilters() {
 
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={() => updateParams({ category: "all" })}
+          onClick={() => updateParams({ category: "all", subcategory: "" })}
           className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
             current.category === "all"
               ? "bg-brand-500 text-white shadow-sm shadow-brand-500/25"
@@ -93,7 +129,7 @@ export default function ProductFilters() {
         {categories.map((cat) => (
           <button
             key={cat.id}
-            onClick={() => updateParams({ category: cat.id })}
+            onClick={() => updateParams({ category: cat.id, subcategory: "" })}
             className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               current.category === cat.id
                 ? "bg-brand-500 text-white shadow-sm shadow-brand-500/25"
@@ -104,6 +140,43 @@ export default function ProductFilters() {
           </button>
         ))}
       </div>
+
+      {subcategories.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-surface-500 uppercase tracking-wide">
+            Subcategories:
+          </span>
+          {loadingSubcategories ? (
+            <Loader2 className="h-4 w-4 animate-spin text-surface-400" />
+          ) : (
+            <>
+              <button
+                onClick={() => updateParams({ subcategory: "" })}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  !currentSubcategory
+                    ? "bg-brand-500 text-white shadow-sm shadow-brand-500/25"
+                    : "bg-white text-surface-600 border border-surface-200 hover:border-brand-300"
+                }`}
+              >
+                All
+              </button>
+              {subcategories.map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => updateParams({ subcategory: sub.id })}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                    currentSubcategory === sub.id
+                      ? "bg-brand-500 text-white shadow-sm shadow-brand-500/25"
+                      : "bg-white text-surface-600 border border-surface-200 hover:border-brand-300"
+                  }`}
+                >
+                  {sub.name}
+                </button>
+              ))}
+            </>
+          )}
+        </div>
+      )}
 
       {showFilters && (
         <div className="rounded-xl border border-surface-200 bg-white p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

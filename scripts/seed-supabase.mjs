@@ -34,15 +34,16 @@ async function seed() {
       price: p.price,
       original_price: p.originalPrice ?? null,
       category: p.category,
+      subcategory: p.subcategory ?? null,
       image: images[0] ?? p.image,
       images,
-    badge: p.badge ?? null,
-    rating: p.rating,
-    reviews: p.reviews,
-    stock: p.stock ?? (p.inStock ? 10 : 0),
-    in_stock: p.inStock,
-    weight: p.weight ?? null,
-    origin: p.origin ?? null,
+      badge: p.badge ?? null,
+      rating: p.rating,
+      reviews: p.reviews,
+      stock: p.stock ?? (p.inStock ? 10 : 0),
+      in_stock: p.inStock,
+      weight: p.weight ?? null,
+      origin: p.origin ?? null,
     };
   });
 

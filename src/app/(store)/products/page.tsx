@@ -10,6 +10,7 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<{
     category?: string;
+    subcategory?: string;
     q?: string;
     min?: string;
     max?: string;
@@ -21,6 +22,7 @@ export default async function ProductsPage({
 
   const filters: Filters = {
     category: params.category || "all",
+    subcategory: params.subcategory,
     query: params.q,
     minPrice: params.min ? parseInt(params.min, 10) : undefined,
     maxPrice: params.max ? parseInt(params.max, 10) : undefined,

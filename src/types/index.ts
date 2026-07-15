@@ -14,6 +14,7 @@ export interface Product {
   price: number;
   originalPrice?: number | null;
   category: Category;
+  subcategory?: string;
   image: string;
   images: string[];
   videos?: string[];
@@ -35,6 +36,17 @@ export interface CategoryInfo {
   id: string;
   name: string;
   description: string;
+  icon: string;
+  image_url?: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface SubcategoryInfo {
+  id: string;
+  name: string;
+  description: string;
+  parent_category: string;
   icon: string;
   image_url?: string;
   sort_order: number;
@@ -87,6 +99,7 @@ export interface AppliedCoupon {
 
 export interface ProductFilters {
   category?: string;
+  subcategory?: string;
   query?: string;
   minPrice?: number;
   maxPrice?: number;

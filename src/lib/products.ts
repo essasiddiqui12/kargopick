@@ -109,6 +109,10 @@ export function filterProducts(
     result = result.filter((p) => p.category === filters.category);
   }
 
+  if (filters.subcategory) {
+    result = result.filter((p) => p.subcategory === filters.subcategory);
+  }
+
   if (filters.query) {
     const q = filters.query.toLowerCase();
     result = result.filter(

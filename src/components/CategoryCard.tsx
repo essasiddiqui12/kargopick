@@ -10,7 +10,7 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ category }: CategoryCardProps) {
-  const href = `/products?category=${category.id}`;
+  const href = `/categories/${category.id}`;
 
   return (
     <Link

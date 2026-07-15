@@ -30,6 +30,7 @@ export function productToRow(product: Partial<Product> & { id?: string }) {
     price: product.price,
     original_price: product.originalPrice ?? null,
     category: product.category,
+    subcategory: product.subcategory ?? null,
     image,
     images,
     videos,
@@ -59,6 +60,7 @@ export function rowToProduct(row: Record<string, unknown>): Product {
       ? Number(row.original_price)
       : undefined,
     category: row.category as Product["category"],
+    subcategory: (row.subcategory as string) || undefined,
     image,
     images,
     videos,
