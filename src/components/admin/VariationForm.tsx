@@ -20,6 +20,7 @@ const VARIATION_TYPES: { value: VariationType; label: string }[] = [
 
 export default function VariationForm({ productId, variations, onChange }: VariationFormProps) {
   const [editing, setEditing] = useState<ProductVariation | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     id: "",
@@ -48,6 +49,12 @@ export default function VariationForm({ productId, variations, onChange }: Varia
       isActive: true,
     });
     setEditing(null);
+    setShowForm(false);
+  }
+
+  function startNewVariation() {
+    resetForm();
+    setShowForm(true);
   }
 
   function startEdit(variation: ProductVariation) {
@@ -64,6 +71,7 @@ export default function VariationForm({ productId, variations, onChange }: Varia
       isActive: variation.isActive,
     });
     setEditing(variation);
+    setShowForm(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -160,7 +168,7 @@ export default function VariationForm({ productId, variations, onChange }: Varia
         <h3 className="text-lg font-semibold text-surface-900">Product Variations</h3>
         <button
           type="button"
-          onClick={() => { resetForm(); }}
+          onClick={startNewVariation}
           className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
         >
           <Plus className="h-4 w-4" />
@@ -168,7 +176,7 @@ export default function VariationForm({ productId, variations, onChange }: Varia
         </button>
       </div>
 
-      {editing && (
+      {showForm && (
         <form onSubmit={handleSubmit} className="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold text-surface-900">{editing ? "Edit Variation" : "New Variation"}</h4>
