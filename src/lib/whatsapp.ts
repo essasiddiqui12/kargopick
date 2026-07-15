@@ -37,7 +37,7 @@ export function getWhatsAppUrlForPhone(phone: string, message: string): string {
 
 export function buildNewOrderAlertMessage(data: {
   orderId: string;
-  items: { name: string; price: number; quantity: number }[];
+  items: { name: string; price: number; quantity: number; variationName?: string }[];
   subtotal: number;
   discount?: number;
   couponCode?: string;
@@ -57,8 +57,10 @@ export function buildNewOrderAlertMessage(data: {
     "",
     "*Order Items*",
     ...data.items.map(
-      (item, i) =>
-        `${i + 1}. *${item.name}*\n   Qty: ${item.quantity} × ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`
+      (item, i) => {
+        const variationText = item.variationName ? `\n   Variation: ${item.variationName}` : "";
+        return `${i + 1}. *${item.name}*${variationText}\n   Qty: ${item.quantity} × ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`;
+      }
     ),
     "",
     `Subtotal: ${formatPrice(data.subtotal)}`,
