@@ -13,6 +13,7 @@ import VariationForm from "@/components/admin/VariationForm";
 interface ProductFormProps {
   initialData?: Product;
   isEdit?: boolean;
+  onProductCreated?: (productId: string) => void;
 }
 
 const emptyForm = {
@@ -33,7 +34,7 @@ const emptyForm = {
   origin: "",
 };
 
-export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
+export default function ProductForm({ initialData, isEdit, onProductCreated }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -166,6 +167,12 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to save product");
+      }
+
+      if (!isEdit) {
+        const data = await res.json();
+        onProductCreated?.(data.id);
+        return;
       }
 
       router.push("/admin");
