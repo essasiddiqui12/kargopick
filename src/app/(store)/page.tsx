@@ -83,21 +83,55 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="border-y border-surface-200/80 bg-white/50 backdrop-blur-sm mt-8">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section className="relative border-y border-surface-200/80 bg-white/60 backdrop-blur-sm mt-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-50/40 via-white/60 to-brand-50/40" />
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:grid-cols-3">
             {[
-              { icon: Shield, title: "100% Authentic", desc: "Genuine products only" },
-              { icon: Truck, title: "Fast Delivery", desc: "Pan-India shipping" },
-              { icon: BadgeCheck, title: "Best Prices", desc: "Direct import savings" },
+              {
+                icon: Shield,
+                title: "100% Authentic",
+                desc: "Genuine products only",
+                color: "from-emerald-500 to-teal-600",
+                bg: "bg-emerald-50",
+                border: "border-emerald-100",
+                text: "text-emerald-700",
+              },
+              {
+                icon: Truck,
+                title: "Fast Delivery",
+                desc: "Pan-India shipping",
+                color: "from-blue-500 to-indigo-600",
+                bg: "bg-blue-50",
+                border: "border-blue-100",
+                text: "text-blue-700",
+              },
+              {
+                icon: BadgeCheck,
+                title: "Best Prices",
+                desc: "Direct import savings",
+                color: "from-amber-500 to-orange-600",
+                bg: "bg-amber-50",
+                border: "border-amber-100",
+                text: "text-amber-700",
+              },
             ].map((item) => (
-              <div key={item.title} className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 border border-brand-100">
-                  <item.icon className="h-6 w-6 text-brand-600" />
+              <div
+                key={item.title}
+                className="group relative flex items-center gap-5 rounded-2xl border border-surface-200 bg-white/80 p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/10 hover:border-brand-300 hover:-translate-y-1"
+              >
+                <div
+                  className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} text-white shadow-lg shadow-brand-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl`}
+                >
+                  <item.icon className="h-7 w-7" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-surface-900">{item.title}</h3>
-                  <p className="text-sm text-surface-500">{item.desc}</p>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-surface-900 text-base sm:text-lg tracking-tight">
+                    {item.title}
+                  </h3>
+                  <p className="mt-0.5 text-sm text-surface-500 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
               </div>
             ))}
