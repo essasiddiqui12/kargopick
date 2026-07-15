@@ -14,6 +14,7 @@ interface ProductFormProps {
   initialData?: Product;
   isEdit?: boolean;
   onProductCreated?: (productId: string) => void;
+  disabled?: boolean;
 }
 
 const emptyForm = {
@@ -34,7 +35,7 @@ const emptyForm = {
   origin: "",
 };
 
-export default function ProductForm({ initialData, isEdit, onProductCreated }: ProductFormProps) {
+export default function ProductForm({ initialData, isEdit, onProductCreated, disabled }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
