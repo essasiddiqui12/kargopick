@@ -139,18 +139,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 bg-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-500/10 via-transparent to-transparent" />
+      <section className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 bg-white overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-50/60 via-white to-emerald-50/40" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-200/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-emerald-200/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-teal-100/20 rounded-full blur-3xl" />
         <div className="relative text-center mb-10 sm:mb-14">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-surface-900">
             Shop by Category
           </h2>
-          <p className="mt-3 text-base sm:text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-3 text-base sm:text-lg text-surface-500 max-w-2xl mx-auto">
             Find exactly what your body needs
           </p>
         </div>
-        <div className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+        <div className="relative grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
           {categories
             .filter((cat) => cat.is_active)
             .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
