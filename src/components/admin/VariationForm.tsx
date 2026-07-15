@@ -19,8 +19,7 @@ const VARIATION_TYPES: { value: VariationType; label: string }[] = [
 ];
 
 export default function VariationForm({ productId, variations, onChange }: VariationFormProps) {
-  const [editing, setEditing] = useState<ProductVariation | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     id: "",
@@ -35,7 +34,25 @@ export default function VariationForm({ productId, variations, onChange }: Varia
     isActive: true,
   });
 
+  useEffect(() => {
+    if (!editingId) {
+      setForm({
+        id: "",
+        type: "flavor",
+        value: "",
+        priceAdjustment: "0",
+        image: "",
+        sku: "",
+        stock: "0",
+        isDefault: false,
+        sortOrder: 0,
+        isActive: true,
+      });
+    }
+  }, [editingId]);
+
   function resetForm() {
+    setEditingId(null);
     setForm({
       id: "",
       type: "flavor",
@@ -48,16 +65,10 @@ export default function VariationForm({ productId, variations, onChange }: Varia
       sortOrder: 0,
       isActive: true,
     });
-    setEditing(null);
-    setShowForm(false);
-  }
-
-  function startNewVariation() {
-    resetForm();
-    setShowForm(true);
   }
 
   function startEdit(variation: ProductVariation) {
+    setEditingId(variation.id);
     setForm({
       id: variation.id,
       type: variation.type,
@@ -70,8 +81,6 @@ export default function VariationForm({ productId, variations, onChange }: Varia
       sortOrder: variation.sortOrder,
       isActive: variation.isActive,
     });
-    setEditing(variation);
-    setShowForm(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,28 +88,16 @@ export default function VariationForm({ productId, variations, onChange }: Varia
     setSaving(true);
 
     try {
-      const url = editing ? `/api/admin/variations` : `/api/admin/variations`;
-      const method = editing ? "PUT" : "POST";
-      const body = editing
-        ? { ...form, id: form.id }
-        : {
-            ...form,
-            id: form.id || `${productId}-${form.type}-${Date.now()}`,
-            productId,
-          };
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) throw new Error("Failed to save variation");
-
-      if (editing) {
+      if (editingId) {
+        const res = await fetch("/api/admin/variations", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, id: editingId }),
+        });
+        if (!res.ok) throw new Error("Failed to update variation");
         onChange(
           variations.map((v) =>
-            v.id === form.id
+            v.id === editingId
               ? {
                   ...v,
                   type: form.type,
@@ -113,12 +110,25 @@ export default function VariationForm({ productId, variations, onChange }: Varia
                   sortOrder: form.sortOrder,
                   isActive: form.isActive,
                 }
-              : ({ ...v, isDefault: false })
+              : form.isDefault
+                ? { ...v, isDefault: false }
+                : v
           )
         );
       } else {
+        const newId = `${productId}-${form.type}-${Date.now()}`;
+        const res = await fetch("/api/admin/variations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            id: newId,
+            productId,
+          }),
+        });
+        if (!res.ok) throw new Error("Failed to create variation");
         const newVariation: ProductVariation = {
-          id: form.id || `${productId}-${form.type}-${Date.now()}`,
+          id: newId,
           productId,
           type: form.type,
           value: form.value,
@@ -151,6 +161,7 @@ export default function VariationForm({ productId, variations, onChange }: Varia
       });
       if (!res.ok) throw new Error("Failed to delete");
       onChange(variations.filter((v) => v.id !== id));
+      if (editingId === id) resetForm();
     } catch {
       alert("Failed to delete variation");
     }
@@ -164,140 +175,136 @@ export default function VariationForm({ productId, variations, onChange }: Varia
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-surface-900">Product Variations</h3>
-        <button
-          type="button"
-          onClick={startNewVariation}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
-        >
-          <Plus className="h-4 w-4" />
-          Add Variation
-        </button>
-      </div>
+      <h3 className="text-lg font-semibold text-surface-900">Product Variations</h3>
+      <p className="text-sm text-surface-500">Add options like flavor, size, color, or other choices for this product.</p>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-surface-900">{editing ? "Edit Variation" : "New Variation"}</h4>
+      <form onSubmit={handleSubmit} className="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="font-semibold text-surface-900">
+            {editingId ? "Edit Variation" : "New Variation"}
+          </h4>
+          {editingId && (
             <button type="button" onClick={resetForm} className="text-surface-400 hover:text-surface-600">
               <X className="h-5 w-5" />
             </button>
-          </div>
+          )}
+        </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Type</label>
-              <select
-                value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value as VariationType })}
-                disabled={!!editing}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
-              >
-                {VARIATION_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Value *</label>
-              <input
-                type="text"
-                value={form.value}
-                onChange={(e) => setForm({ ...form, value: e.target.value })}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                placeholder="Chocolate, 2kg, Blue..."
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Price Adjustment (₹)</label>
-              <input
-                type="number"
-                value={form.priceAdjustment}
-                onChange={(e) => setForm({ ...form, priceAdjustment: e.target.value })}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                placeholder="0"
-              />
-              <p className="text-xs text-surface-400 mt-1">Extra cost over base price. Use negative for discount.</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Stock</label>
-              <input
-                type="number"
-                value={form.stock}
-                onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                placeholder="0"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">SKU (optional)</label>
-              <input
-                type="text"
-                value={form.sku}
-                onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-                placeholder="SKU-001"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-surface-700 mb-1">Sort Order</label>
-              <input
-                type="number"
-                value={form.sortOrder}
-                onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })}
-                className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-              />
-            </div>
-          </div>
-
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Variation Image (optional)</label>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Type *</label>
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value as VariationType })}
+              disabled={!!editingId}
+              className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
+            >
+              {VARIATION_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Value *</label>
             <input
               type="text"
-              value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
+              value={form.value}
+              onChange={(e) => setForm({ ...form, value: e.target.value })}
               className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-              placeholder="https://..."
+              placeholder="Chocolate, 2kg, Blue..."
+              required
             />
           </div>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.isDefault}
-                onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
-                className="h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-500"
-              />
-              <span className="text-sm font-medium text-surface-700">Default variation</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                className="h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-500"
-              />
-              <span className="text-sm font-medium text-surface-700">Active</span>
-            </label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Price Adjustment (₹)</label>
+            <input
+              type="number"
+              value={form.priceAdjustment}
+              onChange={(e) => setForm({ ...form, priceAdjustment: e.target.value })}
+              className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              placeholder="0"
+            />
+            <p className="text-xs text-surface-400 mt-1">Extra cost over base price. Use negative for discount.</p>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Stock *</label>
+            <input
+              type="number"
+              value={form.stock}
+              onChange={(e) => setForm({ ...form, stock: e.target.value })}
+              className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              placeholder="0"
+              required
+            />
+          </div>
+        </div>
 
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-xl bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-50"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editing ? "Update Variation" : "Create Variation"}
-            </button>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">SKU (optional)</label>
+            <input
+              type="text"
+              value={form.sku}
+              onChange={(e) => setForm({ ...form, sku: e.target.value })}
+              className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              placeholder="SKU-001"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Sort Order</label>
+            <input
+              type="number"
+              value={form.sortOrder}
+              onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value) || 0 })}
+              className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-surface-700 mb-1">Variation Image URL (optional)</label>
+          <input
+            type="text"
+            value={form.image}
+            onChange={(e) => setForm({ ...form, image: e.target.value })}
+            className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+            placeholder="https://example.com/image.jpg"
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.isDefault}
+              onChange={(e) => setForm({ ...form, isDefault: e.target.checked })}
+              className="h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-500"
+            />
+            <span className="text-sm font-medium text-surface-700">Default variation</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.isActive}
+              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+              className="h-4 w-4 rounded border-surface-300 text-brand-600 focus:ring-brand-500"
+            />
+            <span className="text-sm font-medium text-surface-700">Active</span>
+          </label>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-xl bg-brand-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? "Update Variation" : "Add Variation"}
+          </button>
+          {editingId && (
             <button
               type="button"
               onClick={resetForm}
@@ -305,18 +312,12 @@ export default function VariationForm({ productId, variations, onChange }: Varia
             >
               Cancel
             </button>
-          </div>
-        </form>
-      )}
-
-      {!editing && variations.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-surface-300 bg-surface-50 p-8 text-center">
-          <p className="text-sm text-surface-500">No variations yet. Add flavor, size, color, or other options for this product.</p>
+          )}
         </div>
-      )}
+      </form>
 
       {variations.length > 0 && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {Object.entries(grouped).map(([type, items]) => (
             <div key={type} className="rounded-2xl border border-surface-200 bg-white overflow-hidden">
               <div className="bg-surface-50 px-4 py-3 border-b border-surface-200">
@@ -366,6 +367,12 @@ export default function VariationForm({ productId, variations, onChange }: Varia
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {variations.length === 0 && !editingId && (
+        <div className="rounded-2xl border border-dashed border-surface-300 bg-surface-50 p-8 text-center">
+          <p className="text-sm text-surface-500">No variations yet. Use the form above to add your first variation.</p>
         </div>
       )}
     </div>
