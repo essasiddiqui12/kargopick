@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Product, Category } from "@/types";
 import { categories } from "@/data/products";
@@ -19,7 +19,8 @@ const emptyForm = {
   description: "",
   price: "",
   originalPrice: "",
-  category: "protein" as Category,
+  category: "gym-essentials" as Category,
+  subcategory: "",
   images: [] as string[],
   videos: [] as string[],
   badge: "",
@@ -35,6 +36,8 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
 
   const [form, setForm] = useState(() => {
     if (!initialData) return emptyForm;
@@ -44,6 +47,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
       price: String(initialData.price),
       originalPrice: initialData.originalPrice ? String(initialData.originalPrice) : "",
       category: initialData.category,
+      subcategory: initialData.subcategory || "",
       images:
         initialData.images?.length > 0
           ? initialData.images
@@ -65,6 +69,36 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  useEffect(() => {
+    async function fetchSubcategories() {
+      if (!form.category) {
+        setSubcategories([]);
+        return;
+      }
+
+      setLoadingSubcategories(true);
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
+        const res = await fetch(`${baseUrl}/api/subcategories/${form.category}`, {
+          cache: "no-store",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setSubcategories(data);
+        } else {
+          setSubcategories([]);
+        }
+      } catch {
+        setSubcategories([]);
+      } finally {
+        setLoadingSubcategories(false);
+      }
+    }
+
+    fetchSubcategories();
+  }, [form.category]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -84,6 +118,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
       price: parseFloat(form.price),
       originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : undefined,
       category: form.category,
+      subcategory: form.subcategory || undefined,
       image: form.images[0],
       images: form.images,
       videos: form.videos,
@@ -185,7 +220,10 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
           <select
             className={inputClass}
             value={form.category}
-            onChange={(e) => update("category", e.target.value)}
+            onChange={(e) => {
+              update("category", e.target.value);
+              update("subcategory", "");
+            }}
           >
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
@@ -193,6 +231,30 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className={labelClass}>Subcategory</label>
+          <select
+            className={inputClass}
+            value={form.subcategory}
+            onChange={(e) => update("subcategory", e.target.value)}
+            disabled={loadingSubcategories || subcategories.length === 0}
+          >
+            <option value="">
+              {loadingSubcategories ? "Loading..." : "Select subcategory"}
+            </option>
+            {subcategories.map((sub) => (
+              <option key={sub.id} value={sub.id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+          {subcategories.length === 0 && !loadingSubcategories && (
+            <p className="text-xs text-surface-400 mt-1">
+              No subcategories available for this category.
+            </p>
+          )}
         </div>
 
         <div>
