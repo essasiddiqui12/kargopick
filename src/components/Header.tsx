@@ -10,8 +10,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
   { href: "/track-order", label: "Track Order" },
-  { href: "/products?category=protein", label: "Proteins" },
-  { href: "/products?category=supplements", label: "Supplements" },
+  { href: "/products?category=gym-essentials", label: "Gym Essentials" },
   { href: "/products?category=imported", label: "Imported" },
 ];
 

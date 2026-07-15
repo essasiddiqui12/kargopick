@@ -25,13 +25,8 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
             <h3 className="font-semibold text-surface-900 mb-4">Shop</h3>
             <ul className="space-y-2 text-sm text-surface-600">
               <li>
-                <Link href="/products?category=protein" className="hover:text-brand-600 transition-colors">
-                  Proteins
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=supplements" className="hover:text-brand-600 transition-colors">
-                  Gym Supplements
+                <Link href="/products?category=gym-essentials" className="hover:text-brand-600 transition-colors">
+                  Gym Essentials
                 </Link>
               </li>
               <li>

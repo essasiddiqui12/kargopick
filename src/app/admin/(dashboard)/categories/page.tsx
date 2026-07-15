@@ -209,7 +209,7 @@ export default function AdminCategoriesPage() {
                   onChange={(e) => setForm({ ...form, id: e.target.value.toLowerCase().replace(/\s+/g, "-") })}
                   disabled={!!editing}
                   className="w-full rounded-lg border border-surface-200 px-3 py-2.5 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:opacity-50"
-                  placeholder="whey-protein"
+                  placeholder="gym-essentials"
                 />
                 <p className="text-xs text-surface-400 mt-1">Used in URLs. Lowercase, hyphens only.</p>
               </div>
