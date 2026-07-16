@@ -65,7 +65,49 @@ export async function getProductById(id: string): Promise<Product | undefined> {
     .maybeSingle();
 
   if (error) throw new Error(error.message);
-  return data ? normalizeProduct(rowToProduct(data)) : undefined;
+  if (!data) return undefined;
+
+  const product = normalizeProduct(rowToProduct(data));
+
+  const { data: variantsData } = await supabase
+    .from("product_variants")
+    .select("*")
+    .eq("product_id", id)
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
+  const variantsWithValues = await Promise.all(
+    (variantsData || []).map(async (variant) => {
+      const { data: valueLinks } = await supabase
+        .from("product_variant_values")
+        .select("product_attribute_values(*)")
+        .eq("variant_id", variant.id);
+
+      const attributeValues = (valueLinks || [])
+        .map((link: any) => link.product_attribute_values)
+        .filter(Boolean);
+
+      return {
+        id: variant.id,
+        product_id: variant.product_id,
+        sku: variant.sku,
+        barcode: variant.barcode,
+        price: variant.price,
+        stock: variant.stock,
+        weight: variant.weight,
+        image: variant.image,
+        is_active: variant.is_active,
+        is_default: variant.is_default,
+        sort_order: variant.sort_order,
+        attribute_values: attributeValues,
+      };
+    })
+  );
+
+  return {
+    ...product,
+    variants: variantsWithValues,
+  };
 }
 
 export async function getProductsByCategory(

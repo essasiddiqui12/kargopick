@@ -8,14 +8,14 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { CartItem, Product } from "@/types";
+import { CartItem, Product, ProductVariant } from "@/types";
 import { CART_STORAGE_KEY } from "@/lib/brand";
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addToCart: (product: Product, variant?: ProductVariant) => void;
+  removeFromCart: (productId: string, variationId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variationId?: string) => void;
   syncItems: (items: CartItem[]) => void;
   clearCart: () => void;
   totalItems: number;
@@ -49,39 +49,73 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, mounted]);
 
-  const addToCart = useCallback((product: Product) => {
+  const getCartItemKey = (productId: string, variationId?: string) =>
+    variationId ? `${productId}::${variationId}` : productId;
+
+  const addToCart = useCallback((product: Product, variant?: ProductVariant) => {
     setItems((prev) => {
-      if (product.stock <= 0 || !product.inStock) return prev;
-      const existing = prev.find((item) => item.product.id === product.id);
+      const effectiveStock = variant?.stock ?? product.stock;
+      if (effectiveStock <= 0) return prev;
+
+      const variantId = variant?.id;
+      const key = getCartItemKey(product.id, variantId);
+      const existing = prev.find((item) => getCartItemKey(item.product.id, item.variantId) === key);
+
       if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? {
-                ...item,
-                product,
-                quantity: Math.min(item.quantity + 1, product.stock),
-              }
-            : item
-        );
+        const maxQty = Math.max(0, variant?.stock ?? product.stock);
+        return prev.map((item) => {
+          if (getCartItemKey(item.product.id, item.variantId) !== key) return item;
+          return {
+            ...item,
+            product,
+            variantId: variantId || item.variantId,
+            variantName: variant
+              ? variant.attribute_values.map((av) => `${av.display_value || av.value}`).join(" / ")
+              : item.variantName,
+            selectedAttributes: variant
+              ? variant.attribute_values.map((av) => ({ attributeName: av.display_value || av.value, value: av.value }))
+              : item.selectedAttributes,
+            quantity: Math.min(item.quantity + 1, maxQty),
+          };
+        });
       }
-      return [...prev, { product, quantity: 1 }];
+
+      return [
+        ...prev,
+        {
+          product,
+          quantity: 1,
+          variantId,
+          variantName: variant
+            ? variant.attribute_values.map((av) => `${av.display_value || av.value}`).join(" / ")
+            : undefined,
+          selectedAttributes: variant
+            ? variant.attribute_values.map((av) => ({ attributeName: av.display_value || av.value, value: av.value }))
+            : undefined,
+        },
+      ];
     });
     setIsCartOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setItems((prev) => prev.filter((item) => item.product.id !== productId));
+  const removeFromCart = useCallback((productId: string, variationId?: string) => {
+    setItems((prev) =>
+      prev.filter((item) => getCartItemKey(item.product.id, item.variantId) !== getCartItemKey(productId, variationId))
+    );
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, variationId?: string) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((item) => item.product.id !== productId));
+      setItems((prev) =>
+        prev.filter((item) => getCartItemKey(item.product.id, item.variantId) !== getCartItemKey(productId, variationId))
+      );
       return;
     }
     setItems((prev) =>
       prev.map((item) => {
-        if (item.product.id !== productId) return item;
-        const maxQty = Math.max(0, item.product.stock);
+        if (getCartItemKey(item.product.id, item.variantId) !== getCartItemKey(productId, variationId)) return item;
+        const variation = item.variantId ? item.product.variants?.find((v) => v.id === item.variantId) : undefined;
+        const maxQty = Math.max(0, variation ? variation.stock : item.product.stock);
         return { ...item, quantity: Math.min(quantity, maxQty) };
       })
     );
@@ -94,10 +128,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => setItems([]), []);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const totalPrice = items.reduce((sum, item) => {
+    const variation = item.variantId ? item.product.variants?.find((v) => v.id === item.variantId) : undefined;
+    const price = (variation?.price ?? item.product.price);
+    return sum + price * item.quantity;
+  }, 0);
 
   return (
     <CartContext.Provider

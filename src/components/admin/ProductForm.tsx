@@ -361,6 +361,20 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
             )}
           </p>
         </div>
+
+        {isEdit && initialData && (
+          <div className="sm:col-span-2 border-t border-surface-200 pt-6">
+            <h3 className="text-lg font-semibold text-surface-900 mb-4">Product Attributes & Variants</h3>
+            <p className="text-sm text-surface-500 mb-4">
+              Assign attributes to this product and generate variants. Attributes marked as "Creates Variants" will automatically generate variant combinations.
+            </p>
+            <div className="rounded-xl border border-dashed border-surface-300 bg-surface-50 p-6 text-center">
+              <p className="text-sm text-surface-500">
+                Attribute management coming soon. Use the Attributes page to define global attributes, then assign them here.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3 pt-2">

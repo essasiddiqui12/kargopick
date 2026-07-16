@@ -15,6 +15,7 @@ import {
   ImageIcon,
   FolderTree,
   ListTree,
+  ToggleLeft,
 } from "lucide-react";
 import { BRAND_PREFIX, BRAND_SUFFIX } from "@/lib/brand";
 
@@ -25,6 +26,7 @@ const links = [
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/subcategories", label: "Subcategories", icon: ListTree },
+  { href: "/admin/attributes", label: "Attributes", icon: ToggleLeft },
   { href: "/admin/coupons", label: "Coupons", icon: Tag },
   { href: "/admin/settings", label: "Store Settings", icon: Settings },
   { href: "/admin/products/new", label: "Add Product", icon: Plus },
@@ -67,11 +69,13 @@ export default function AdminSidebar() {
                       ? pathname.startsWith("/admin/categories")
                       : link.href === "/admin/subcategories"
                         ? pathname.startsWith("/admin/subcategories")
-                        : link.href === "/admin/coupons"
-                          ? pathname.startsWith("/admin/coupons")
-                          : link.href === "/admin/settings"
-                            ? pathname.startsWith("/admin/settings")
-                            : pathname.startsWith(link.href);
+                        : link.href === "/admin/attributes"
+                          ? pathname.startsWith("/admin/attributes")
+                          : link.href === "/admin/coupons"
+                            ? pathname.startsWith("/admin/coupons")
+                            : link.href === "/admin/settings"
+                              ? pathname.startsWith("/admin/settings")
+                              : pathname.startsWith(link.href);
           return (
             <Link
               key={link.href}

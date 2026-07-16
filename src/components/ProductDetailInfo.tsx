@@ -1,11 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Star, ShieldCheck, MessageCircle, Truck } from "lucide-react";
-import { Product } from "@/types";
+import { Product, ProductVariant } from "@/types";
 import { categories, formatPrice } from "@/data/products";
 import { StockStatus, getStockStatus } from "@/lib/products";
 import AddToCartButton from "@/components/AddToCartButton";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import ProductDescription from "@/components/ProductDescription";
+import VariantSelector from "@/components/VariantSelector";
 
 function stockPill(status: StockStatus, stock: number) {
   if (status === "out_of_stock") {
@@ -39,6 +43,10 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
         ((product.originalPrice! - product.price) / product.originalPrice!) * 100
       )
     : 0;
+
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
+
+  const currentPrice = selectedVariant?.price ?? product.price;
 
   return (
     <div className="static lg:sticky lg:top-24 lg:self-start">
@@ -84,8 +92,8 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
 
         <div className="mt-6 border-t border-surface-100 pt-6">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-3xl font-bold text-brand-600">
-              {formatPrice(product.price)}
+            <span className="text-3xl font-bold text-brand-600" id="product-price">
+              {formatPrice(currentPrice)}
             </span>
             {hasDiscount && (
               <>
@@ -132,6 +140,15 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
           </dl>
         )}
 
+        <div className="mt-4 sm:mt-6">
+          <VariantSelector
+            product={product}
+            onSelectionChange={(variant) => {
+              setSelectedVariant(variant);
+            }}
+          />
+        </div>
+
         <ul className="mt-4 sm:mt-6 space-y-2 text-sm text-surface-600">
           <li className="flex items-center gap-2.5">
             <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-500" />
@@ -148,7 +165,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
         </ul>
 
         <div className="mt-6 sm:mt-8 space-y-3 border-t border-surface-100 pt-4 sm:pt-6">
-          <AddToCartButton product={product} fullWidth />
+          <AddToCartButton product={product} variant={selectedVariant} fullWidth />
           <WhatsAppShareButton product={product} fullWidth />
         </div>
       </div>

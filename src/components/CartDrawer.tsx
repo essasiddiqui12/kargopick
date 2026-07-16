@@ -162,12 +162,21 @@ export default function CartDrawer() {
       return;
     }
 
-    const orderItems = items.map((item) => ({
-      productId: item.product.id,
-      name: item.product.name,
-      price: item.product.price,
-      quantity: item.quantity,
-    }));
+    const orderItems = items.map((item) => {
+      const variation = item.variantId
+        ? item.product.variants?.find((v) => v.id === item.variantId)
+        : undefined;
+      const price = variation?.price ?? item.product.price;
+      return {
+        productId: item.product.id,
+        name: item.product.name,
+        price,
+        quantity: item.quantity,
+        variantId: item.variantId,
+        variantName: item.variantName,
+        selectedAttributes: item.selectedAttributes,
+      };
+    });
 
     try {
       const res = await fetch("/api/orders", {
@@ -328,17 +337,25 @@ export default function CartDrawer() {
 
               <div className="rounded-xl bg-surface-50 border border-surface-200 p-4 space-y-3">
                 <p className="text-sm font-medium text-surface-700">Order Summary</p>
-                {items.map((item) => (
-                  <div
-                    key={item.product.id}
-                    className="flex justify-between text-sm text-surface-600 py-1"
-                  >
-                    <span>
-                      {item.product.name} × {item.quantity}
-                    </span>
-                    <span>{formatPrice(item.product.price * item.quantity)}</span>
-                  </div>
-                ))}
+                {items.map((item) => {
+                  const variation = item.variantId
+                    ? item.product.variants?.find((v) => v.id === item.variantId)
+                    : undefined;
+                  const itemPrice = variation?.price ?? item.product.price;
+                  return (
+                    <div
+                      key={`${item.product.id}-${item.variantId || "base"}`}
+                      className="flex justify-between text-sm text-surface-600 py-1"
+                    >
+                      <span>
+                        {item.product.name}
+                        {item.variantName && <span className="text-surface-400"> ({item.variantName})</span>}
+                        {" × "}{item.quantity}
+                      </span>
+                      <span>{formatPrice(itemPrice * item.quantity)}</span>
+                    </div>
+                  );
+                })}
                 <OrderTotals subtotal={totalPrice} coupon={appliedCoupon} />
               </div>
             </div>
@@ -397,69 +414,77 @@ export default function CartDrawer() {
                 </div>
               )}
 
-              {items.map((item) => {
-                const issue = getIssue(item.product.id);
-                const atMaxStock =
-                  item.product.stock > 0 && item.quantity >= item.product.stock;
+                {items.map((item) => {
+                  const issue = getIssue(item.product.id);
+                  const atMaxStock =
+                    item.product.stock > 0 && item.quantity >= item.product.stock;
+                  const variation = item.variantId
+                    ? item.product.variants?.find((v) => v.id === item.variantId)
+                    : undefined;
+                  const itemImage = variation?.image || item.product.image;
+                  const itemPrice = variation?.price ?? item.product.price;
 
-                return (
-                  <div
-                    key={item.product.id}
-                    className={`flex gap-4 rounded-xl border p-3 ${
-                      issue
-                        ? "border-rose-200 bg-rose-50/50"
-                        : "border-surface-200 bg-surface-50"
-                    }`}
-                  >
-                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
-                       <Image
-                         src={item.product.image}
-                         alt={item.product.name}
-                         fill
-                         className="object-contain"
-                       />
-                     </div>
-                    <div className="flex flex-1 flex-col min-w-0">
-                      <h3 className="font-medium text-sm text-surface-900 line-clamp-1">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-brand-600 font-semibold text-sm mt-1">
-                        {formatPrice(item.product.price)}
-                      </p>
+                 return (
+                   <div
+                     key={`${item.product.id}-${item.variantId || "base"}`}
+                     className={`flex gap-4 rounded-xl border p-3 ${
+                       issue
+                         ? "border-rose-200 bg-rose-50/50"
+                         : "border-surface-200 bg-surface-50"
+                     }`}
+                   >
+                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
+                        <Image
+                          src={itemImage}
+                          alt={item.product.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                     <div className="flex flex-1 flex-col min-w-0">
+                       <h3 className="font-medium text-sm text-surface-900 line-clamp-1">
+                         {item.product.name}
+                       </h3>
+                       {item.variantName && (
+                         <p className="text-xs text-surface-500 mt-0.5">{item.variantName}</p>
+                       )}
+                       <p className="text-brand-600 font-semibold text-sm mt-1">
+                         {formatPrice(itemPrice)}
+                       </p>
                       {issue && (
                         <p className="mt-1 text-xs font-medium text-rose-600">
                           {issue.message}
                         </p>
                       )}
-                      <div className="mt-auto flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity - 1)
-                            }
-                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-6 text-center text-sm font-medium text-surface-800">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity + 1)
-                            }
-                            disabled={atMaxStock || !!issue}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                          >
-                            <Plus className="h-3 w-3" />
+                       <div className="mt-auto flex items-center justify-between">
+                         <div className="flex items-center gap-2">
+                           <button
+                             onClick={() =>
+                               updateQuantity(item.product.id, item.quantity - 1, item.variantId)
+                             }
+                             className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
+                           >
+                             <Minus className="h-3 w-3" />
+                           </button>
+                           <span className="w-6 text-center text-sm font-medium text-surface-800">
+                             {item.quantity}
+                           </span>
+                           <button
+                             onClick={() =>
+                               updateQuantity(item.product.id, item.quantity + 1, item.variantId)
+                             }
+                             disabled={atMaxStock || !!issue}
+                             className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                           >
+                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
-                        <button
-                          onClick={() => removeFromCart(item.product.id)}
-                          className="text-surface-400 hover:text-rose-500 transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                         <button
+                           onClick={() => removeFromCart(item.product.id, item.variantId)}
+                           className="text-surface-400 hover:text-rose-500 transition-colors"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </button>
                       </div>
                     </div>
                   </div>
