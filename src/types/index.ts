@@ -1,56 +1,21 @@
 export type Category = string;
 
-export type AttributeType = "select" | "multiselect" | "text" | "number" | "boolean" | "color" | "date";
-
-export interface ProductAttribute {
-  id: string;
-  name: string;
-  display_name: string;
-  type: AttributeType;
-  is_variant: boolean;
-  is_required: boolean;
-  sort_order: number;
-  is_active: boolean;
-  attribute_values?: ProductAttributeValue[];
-}
-
-export interface ProductAttributeValue {
-  id: string;
-  attribute_id: string;
-  value: string;
-  display_value?: string;
-  meta_data?: Record<string, unknown>;
-  sort_order: number;
-  is_active: boolean;
-}
-
-export interface ProductAttributeAssignment {
-  id: string;
-  product_id: string;
-  attribute_id: string;
-  is_required: boolean;
-  is_variant: boolean;
-  sort_order: number;
-}
+export type VariantType = "flavor" | "size" | "weight" | "color" | "other";
 
 export interface ProductVariant {
   id: string;
   product_id: string;
+  type: VariantType;
+  value: string;
+  priceAdjustment: number;
+  stock: number;
   sku?: string;
   barcode?: string;
-  price?: number;
-  stock: number;
-  weight?: string;
   image?: string;
+  weight?: string;
   is_active: boolean;
   is_default: boolean;
   sort_order: number;
-  attribute_values: ProductAttributeValue[];
-}
-
-export interface SelectedVariant {
-  variant: ProductVariant;
-  attributeValueIds: string[];
 }
 
 export type OrderStatus =
@@ -78,7 +43,6 @@ export interface Product {
   inStock: boolean;
   weight?: string;
   origin?: string;
-  attributes?: ProductAttributeAssignment[];
   variants?: ProductVariant[];
 }
 
@@ -87,7 +51,8 @@ export interface CartItem {
   quantity: number;
   variantId?: string;
   variantName?: string;
-  selectedAttributes?: { attributeName: string; value: string }[];
+  variantType?: string;
+  variantValue?: string;
 }
 
 export interface CategoryInfo {
@@ -118,7 +83,8 @@ export interface OrderItem {
   quantity: number;
   variantId?: string;
   variantName?: string;
-  selectedAttributes?: { attributeName: string; value: string }[];
+  variantType?: string;
+  variantValue?: string;
 }
 
 export interface Order {

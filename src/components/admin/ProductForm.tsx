@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Product, Category, ProductAttributeAssignment } from "@/types";
+import { Product, Category, ProductVariant } from "@/types";
 import { categories } from "@/data/products";
 import { Loader2 } from "lucide-react";
 import MultiImageUploadField from "@/components/admin/MultiImageUploadField";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import { LowStockHint } from "@/components/admin/StockStatusBadge";
-import AttributeAssignmentForm from "@/components/admin/AttributeAssignmentForm";
+import VariantManager from "@/components/admin/VariantManager";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -39,7 +39,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   const [error, setError] = useState("");
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
-  const [assignments, setAssignments] = useState<ProductAttributeAssignment[]>([]);
+  const [assignments, setAssignments] = useState<ProductVariant[]>([]);
 
   const [form, setForm] = useState(() => {
     if (!initialData) return emptyForm;
@@ -102,20 +102,35 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   }, [form.category]);
 
   useEffect(() => {
-    async function fetchAssignments() {
+    async function fetchVariants() {
       if (!initialData?.id) return;
       try {
-        const res = await fetch(`/api/admin/attribute-assignments?product_id=${initialData.id}`);
+        const res = await fetch(`/api/admin/variants?product_id=${initialData.id}`);
         if (res.ok) {
           const data = await res.json();
-          setAssignments(data);
+          const mapped = data.map((v: any) => ({
+            id: v.id,
+            product_id: v.product_id,
+            type: v.type || "other",
+            value: v.value,
+            priceAdjustment: Number(v.price_adjustment || 0),
+            stock: Number(v.stock || 0),
+            sku: v.sku,
+            barcode: v.barcode,
+            image: v.image,
+            weight: v.weight,
+            is_active: v.is_active,
+            is_default: v.is_default,
+            sort_order: v.sort_order,
+          }));
+          setAssignments(mapped);
         }
       } catch {
         // silently fail
       }
     }
 
-    fetchAssignments();
+    fetchVariants();
   }, [initialData?.id]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -383,13 +398,9 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
 
         {isEdit && initialData && (
           <div className="sm:col-span-2 border-t border-surface-200 pt-6">
-            <h3 className="text-lg font-semibold text-surface-900 mb-4">Product Attributes & Variants</h3>
-            <p className="text-sm text-surface-500 mb-4">
-              Assign attributes to this product and generate variants. Attributes marked as &quot;Creates Variants&quot; will automatically generate variant combinations.
-            </p>
-            <AttributeAssignmentForm
+            <VariantManager
               productId={initialData.id}
-              assignments={assignments}
+              variants={assignments}
               onChange={setAssignments}
             />
           </div>

@@ -166,7 +166,7 @@ export default function CartDrawer() {
       const variation = item.variantId
         ? item.product.variants?.find((v) => v.id === item.variantId)
         : undefined;
-      const price = variation?.price ?? item.product.price;
+      const price = item.product.price + (variation?.priceAdjustment ?? 0);
       return {
         productId: item.product.id,
         name: item.product.name,
@@ -174,7 +174,8 @@ export default function CartDrawer() {
         quantity: item.quantity,
         variantId: item.variantId,
         variantName: item.variantName,
-        selectedAttributes: item.selectedAttributes,
+        variantType: item.variantType,
+        variantValue: item.variantValue,
       };
     });
 
@@ -338,10 +339,10 @@ export default function CartDrawer() {
               <div className="rounded-xl bg-surface-50 border border-surface-200 p-4 space-y-3">
                 <p className="text-sm font-medium text-surface-700">Order Summary</p>
                 {items.map((item) => {
-                  const variation = item.variantId
-                    ? item.product.variants?.find((v) => v.id === item.variantId)
-                    : undefined;
-                  const itemPrice = variation?.price ?? item.product.price;
+                   const variation = item.variantId
+                     ? item.product.variants?.find((v) => v.id === item.variantId)
+                     : undefined;
+                   const itemPrice = item.product.price + (variation?.priceAdjustment ?? 0);
                   return (
                     <div
                       key={`${item.product.id}-${item.variantId || "base"}`}
@@ -422,7 +423,7 @@ export default function CartDrawer() {
                     ? item.product.variants?.find((v) => v.id === item.variantId)
                     : undefined;
                   const itemImage = variation?.image || item.product.image;
-                  const itemPrice = variation?.price ?? item.product.price;
+                   const itemPrice = item.product.price + (variation?.priceAdjustment ?? 0);
 
                  return (
                    <div

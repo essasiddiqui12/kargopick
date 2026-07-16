@@ -33,7 +33,13 @@ function stockPill(status: StockStatus, stock: number) {
   );
 }
 
-export default function ProductDetailInfo({ product }: { product: Product }) {
+export default function ProductDetailInfo({ 
+  product, 
+  onVariantImageChange 
+}: { 
+  product: Product;
+  onVariantImageChange?: (url: string) => void;
+}) {
   const category = categories.find((c) => c.id === product.category);
   const stockStatus = getStockStatus(product);
   const hasDiscount =
@@ -46,7 +52,18 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
 
-  const currentPrice = selectedVariant?.price ?? product.price;
+  const currentPrice = product.price + (selectedVariant?.priceAdjustment ?? 0);
+
+  function handleVariantChange(variant: ProductVariant | undefined) {
+    setSelectedVariant(variant);
+    if (onVariantImageChange) {
+      if (variant?.image) {
+        onVariantImageChange(variant.image);
+      } else {
+        onVariantImageChange(product.images?.[0] || product.image || "");
+      }
+    }
+  }
 
   return (
     <div className="static lg:sticky lg:top-24 lg:self-start">
@@ -143,9 +160,7 @@ export default function ProductDetailInfo({ product }: { product: Product }) {
         <div className="mt-4 sm:mt-6">
           <VariantSelector
             product={product}
-            onSelectionChange={(variant) => {
-              setSelectedVariant(variant);
-            }}
+            onSelectionChange={handleVariantChange}
           />
         </div>
 

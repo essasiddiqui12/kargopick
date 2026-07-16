@@ -22,35 +22,23 @@ export async function GET(
       return NextResponse.json({ error: "Failed to fetch variants" }, { status: 500 });
     }
 
-    const variantsWithValues = await Promise.all(
-      (variants || []).map(async (variant) => {
-        const { data: valueLinks } = await supabase
-          .from("product_variant_values")
-          .select("product_attribute_values(*)")
-          .eq("variant_id", variant.id);
+    const mapped = (variants || []).map((v: any) => ({
+      id: v.id,
+      product_id: v.product_id,
+      type: v.type || "other",
+      value: v.value,
+      priceAdjustment: Number(v.price_adjustment || 0),
+      stock: Number(v.stock || 0),
+      sku: v.sku,
+      barcode: v.barcode,
+      image: v.image,
+      weight: v.weight,
+      is_active: v.is_active,
+      is_default: v.is_default,
+      sort_order: v.sort_order,
+    }));
 
-        const attributeValues = (valueLinks || [])
-          .map((link: any) => link.product_attribute_values)
-          .filter(Boolean);
-
-        return {
-          id: variant.id,
-          product_id: variant.product_id,
-          sku: variant.sku,
-          barcode: variant.barcode,
-          price: variant.price,
-          stock: variant.stock,
-          weight: variant.weight,
-          image: variant.image,
-          is_active: variant.is_active,
-          is_default: variant.is_default,
-          sort_order: variant.sort_order,
-          attribute_values: attributeValues,
-        };
-      })
-    );
-
-    return NextResponse.json(variantsWithValues);
+    return NextResponse.json(mapped);
   } catch {
     return NextResponse.json({ error: "Failed to fetch variants" }, { status: 500 });
   }

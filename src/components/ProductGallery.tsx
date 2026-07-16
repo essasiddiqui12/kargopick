@@ -10,6 +10,7 @@ interface ProductGalleryProps {
   name: string;
   badge?: string;
   showBadge?: boolean;
+  activeImageOverride?: string;
 }
 
 type MediaItem =
@@ -22,6 +23,7 @@ export default function ProductGallery({
   name,
   badge,
   showBadge = true,
+  activeImageOverride,
 }: ProductGalleryProps) {
   const mediaItems: MediaItem[] = [
     ...images.map((url) => ({ type: "image" as const, url })),
@@ -73,7 +75,9 @@ export default function ProductGallery({
     );
   }
 
-  const activeItem = gallery[activeIndex];
+  const activeItem = activeImageOverride
+    ? { type: "image" as const, url: activeImageOverride }
+    : gallery[activeIndex];
 
   return (
     <div className="space-y-3">

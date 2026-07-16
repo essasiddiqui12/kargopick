@@ -26,7 +26,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch variants" }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
+    const mapped = (data || []).map((v: any) => ({
+      id: v.id,
+      product_id: v.product_id,
+      type: v.type || "other",
+      value: v.value,
+      priceAdjustment: Number(v.price_adjustment || 0),
+      stock: Number(v.stock || 0),
+      sku: v.sku,
+      barcode: v.barcode,
+      image: v.image,
+      weight: v.weight,
+      is_active: v.is_active,
+      is_default: v.is_default,
+      sort_order: v.sort_order,
+    }));
+
+    return NextResponse.json(mapped);
   } catch {
     return NextResponse.json({ error: "Failed to fetch variants" }, { status: 500 });
   }
@@ -38,7 +54,21 @@ export async function POST(request: NextRequest) {
     if (authError) return authError;
 
     const body = await request.json();
-    const { id, product_id, sku, barcode, price, stock, weight, image, is_active = true, is_default = false, sort_order = 0 } = body;
+    const {
+      id,
+      product_id,
+      type = "other",
+      value = "",
+      price_adjustment = 0,
+      sku,
+      barcode,
+      stock = 0,
+      weight,
+      image,
+      is_active = true,
+      is_default = false,
+      sort_order = 0,
+    } = body;
 
     if (!id || !product_id) {
       return NextResponse.json(
@@ -53,9 +83,11 @@ export async function POST(request: NextRequest) {
       .insert({
         id,
         product_id,
+        type,
+        value,
+        price_adjustment: Number(price_adjustment) || 0,
         sku: sku || null,
         barcode: barcode || null,
-        price: price ? Number(price) : null,
         stock: Number(stock) || 0,
         weight: weight || null,
         image: image || null,
@@ -70,7 +102,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create variant" }, { status: 500 });
     }
 
-    return NextResponse.json(data, { status: 201 });
+    const mapped = {
+      id: data.id,
+      product_id: data.product_id,
+      type: data.type || "other",
+      value: data.value,
+      priceAdjustment: Number(data.price_adjustment || 0),
+      stock: Number(data.stock || 0),
+      sku: data.sku,
+      barcode: data.barcode,
+      image: data.image,
+      weight: data.weight,
+      is_active: data.is_active,
+      is_default: data.is_default,
+      sort_order: data.sort_order,
+    };
+
+    return NextResponse.json(mapped, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create variant" }, { status: 500 });
   }
@@ -92,15 +140,17 @@ export async function PUT(request: NextRequest) {
     const { data, error } = await supabase
       .from("product_variants")
       .update({
+        type: updates.type || "other",
+        value: updates.value || "",
+        price_adjustment: Number(updates.price_adjustment || 0),
         sku: updates.sku || null,
         barcode: updates.barcode || null,
-        price: updates.price ? Number(updates.price) : null,
-        stock: Number(updates.stock) || 0,
+        stock: Number(updates.stock || 0),
         weight: updates.weight || null,
         image: updates.image || null,
         is_active: Boolean(updates.is_active),
         is_default: Boolean(updates.is_default),
-        sort_order: Number(updates.sort_order) || 0,
+        sort_order: Number(updates.sort_order || 0),
       })
       .eq("id", id)
       .select()
@@ -110,7 +160,23 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Failed to update variant" }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    const mapped = {
+      id: data.id,
+      product_id: data.product_id,
+      type: data.type || "other",
+      value: data.value,
+      priceAdjustment: Number(data.price_adjustment || 0),
+      stock: Number(data.stock || 0),
+      sku: data.sku,
+      barcode: data.barcode,
+      image: data.image,
+      weight: data.weight,
+      is_active: data.is_active,
+      is_default: data.is_default,
+      sort_order: data.sort_order,
+    };
+
+    return NextResponse.json(mapped);
   } catch {
     return NextResponse.json({ error: "Failed to update variant" }, { status: 500 });
   }

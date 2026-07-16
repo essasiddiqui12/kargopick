@@ -69,12 +69,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
             ...item,
             product,
             variantId: variantId || item.variantId,
-            variantName: variant
-              ? variant.attribute_values.map((av) => `${av.display_value || av.value}`).join(" / ")
-              : item.variantName,
-            selectedAttributes: variant
-              ? variant.attribute_values.map((av) => ({ attributeName: av.display_value || av.value, value: av.value }))
-              : item.selectedAttributes,
+            variantName: variant ? `${variant.type}: ${variant.value}` : item.variantName,
+            variantType: variant?.type || item.variantType,
+            variantValue: variant?.value || item.variantValue,
             quantity: Math.min(item.quantity + 1, maxQty),
           };
         });
@@ -86,12 +83,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           product,
           quantity: 1,
           variantId,
-          variantName: variant
-            ? variant.attribute_values.map((av) => `${av.display_value || av.value}`).join(" / ")
-            : undefined,
-          selectedAttributes: variant
-            ? variant.attribute_values.map((av) => ({ attributeName: av.display_value || av.value, value: av.value }))
-            : undefined,
+          variantName: variant ? `${variant.type}: ${variant.value}` : undefined,
+          variantType: variant?.type,
+          variantValue: variant?.value,
         },
       ];
     });
@@ -130,7 +124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => {
     const variation = item.variantId ? item.product.variants?.find((v) => v.id === item.variantId) : undefined;
-    const price = (variation?.price ?? item.product.price);
+    const price = (variation?.priceAdjustment ? item.product.price + variation.priceAdjustment : item.product.price);
     return sum + price * item.quantity;
   }, 0);
 
