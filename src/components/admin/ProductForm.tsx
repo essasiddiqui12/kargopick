@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Product, Category, ProductVariant } from "@/types";
+import { Product, Category } from "@/types";
 import { categories } from "@/data/products";
 import { Loader2 } from "lucide-react";
 import MultiImageUploadField from "@/components/admin/MultiImageUploadField";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import { LowStockHint } from "@/components/admin/StockStatusBadge";
-import VariantManager from "@/components/admin/VariantManager";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -39,7 +38,6 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   const [error, setError] = useState("");
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
-  const [assignments, setAssignments] = useState<ProductVariant[]>([]);
 
   const [form, setForm] = useState(() => {
     if (!initialData) return emptyForm;
@@ -100,38 +98,6 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
 
     fetchSubcategories();
   }, [form.category]);
-
-  useEffect(() => {
-    async function fetchVariants() {
-      if (!initialData?.id) return;
-      try {
-        const res = await fetch(`/api/admin/variants?product_id=${initialData.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          const mapped = data.map((v: any) => ({
-            id: v.id,
-            product_id: v.product_id,
-            type: v.type || "other",
-            value: v.value,
-            priceAdjustment: Number(v.priceAdjustment || v.price_adjustment || 0),
-            stock: Number(v.stock || 0),
-            sku: v.sku,
-            barcode: v.barcode,
-            image: v.image,
-            weight: v.weight,
-            is_active: v.is_active,
-            is_default: v.is_default,
-            sort_order: v.sort_order,
-          }));
-          setAssignments(mapped);
-        }
-      } catch {
-        // silently fail
-      }
-    }
-
-    fetchVariants();
-  }, [initialData?.id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -395,16 +361,6 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
             )}
           </p>
         </div>
-
-        {isEdit && initialData && (
-          <div className="sm:col-span-2 border-t border-surface-200 pt-6">
-            <VariantManager
-              productId={initialData.id}
-              variants={assignments}
-              onChange={setAssignments}
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex gap-3 pt-2">

@@ -67,35 +67,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   if (error) throw new Error(error.message);
   if (!data) return undefined;
 
-  const product = normalizeProduct(rowToProduct(data));
-
-  const { data: variantsData } = await supabase
-    .from("product_variants")
-    .select("*")
-    .eq("product_id", id)
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
-
-  const variantsWithValues = (variantsData || []).map((variant) => ({
-    id: variant.id,
-    product_id: variant.product_id,
-    type: variant.type || "other",
-    value: variant.value,
-    priceAdjustment: Number(variant.price_adjustment || 0),
-    stock: Number(variant.stock || 0),
-    sku: variant.sku,
-    barcode: variant.barcode,
-    image: variant.image,
-    weight: variant.weight,
-    is_active: variant.is_active,
-    is_default: variant.is_default,
-    sort_order: variant.sort_order,
-  }));
-
-  return {
-    ...product,
-    variants: variantsWithValues,
-  };
+  return normalizeProduct(rowToProduct(data));
 }
 
 export async function getProductsByCategory(

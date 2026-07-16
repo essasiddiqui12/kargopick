@@ -69,13 +69,7 @@ export default async function OrderConfirmationPage({
                   className="flex justify-between text-sm border-b border-surface-100 pb-3 last:border-0 last:pb-0"
                 >
                   <span className="text-surface-700">
-                    {item.name}
-                    {Object.keys(item.selectedVariants).length > 0 && (
-                      <span className="text-surface-500">
-                        {" "}({Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})
-                      </span>
-                    )}
-                    {" × "}{item.quantity}
+                    {item.name} × {item.quantity}
                   </span>
                   <span className="font-medium text-surface-900">
                     {formatPrice(item.price * item.quantity)}

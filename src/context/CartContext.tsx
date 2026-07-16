@@ -8,14 +8,14 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { CartItem, Product, ProductVariant } from "@/types";
+import { CartItem, Product } from "@/types";
 import { CART_STORAGE_KEY } from "@/lib/brand";
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, selectedVariants: Record<string, ProductVariant>) => void;
-  removeFromCart: (productId: string, selectedVariants: Record<string, ProductVariant>) => void;
-  updateQuantity: (productId: string, quantity: number, selectedVariants: Record<string, ProductVariant>) => void;
+  addToCart: (product: Product) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   syncItems: (items: CartItem[]) => void;
   clearCart: () => void;
   totalItems: number;
@@ -36,25 +36,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem(CART_STORAGE_KEY);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        const migrated = parsed.map((item: any) => {
-          if (item.selectedVariants && typeof item.selectedVariants === "object") {
-            return item as CartItem;
-          }
-          const selectedVariants: Record<string, ProductVariant> = {};
-          if (item.variantId && item.product?.variants) {
-            const variant = item.product.variants.find((v: ProductVariant) => v.id === item.variantId);
-            if (variant) {
-              selectedVariants[variant.type] = variant;
-            }
-          }
-          return {
-            product: item.product,
-            quantity: item.quantity,
-            selectedVariants,
-          } as CartItem;
-        });
-        setItems(migrated);
+        setItems(JSON.parse(saved));
       } catch {
         localStorage.removeItem(CART_STORAGE_KEY);
       }
@@ -67,31 +49,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, mounted]);
 
-  const getCartItemKey = (productId: string, selectedVariants: Record<string, ProductVariant> = {}) => {
-    const variantKeys = Object.entries(selectedVariants)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([type, v]) => `${type}:${v.id}`)
-      .join("|");
-    return variantKeys ? `${productId}::${variantKeys}` : productId;
-  };
-
-  const addToCart = useCallback((product: Product, selectedVariants: Record<string, ProductVariant>) => {
+  const addToCart = useCallback((product: Product) => {
     setItems((prev) => {
-      const totalAdjustment = Object.values(selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
       const effectiveStock = product.stock;
       if (effectiveStock <= 0) return prev;
 
-      const key = getCartItemKey(product.id, selectedVariants);
-      const existing = prev.find((item) => getCartItemKey(item.product.id, item.selectedVariants) === key);
+      const key = product.id;
+      const existing = prev.find((item) => item.product.id === key);
 
       if (existing) {
         const maxQty = Math.max(0, effectiveStock);
         return prev.map((item) => {
-          if (getCartItemKey(item.product.id, item.selectedVariants) !== key) return item;
+          if (item.product.id !== key) return item;
           return {
             ...item,
             product,
-            selectedVariants,
             quantity: Math.min(item.quantity + 1, maxQty),
           };
         });
@@ -102,29 +74,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
         {
           product,
           quantity: 1,
-          selectedVariants,
         },
       ];
     });
     setIsCartOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId: string, selectedVariants: Record<string, ProductVariant> = {}) => {
-    setItems((prev) =>
-      prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants || {}) !== getCartItemKey(productId, selectedVariants))
-    );
+  const removeFromCart = useCallback((productId: string) => {
+    setItems((prev) => prev.filter((item) => item.product.id !== productId));
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number, selectedVariants: Record<string, ProductVariant> = {}) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems((prev) =>
-        prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants || {}) !== getCartItemKey(productId, selectedVariants))
-      );
+      setItems((prev) => prev.filter((item) => item.product.id !== productId));
       return;
     }
     setItems((prev) =>
       prev.map((item) => {
-        if (getCartItemKey(item.product.id, item.selectedVariants || {}) !== getCartItemKey(productId, selectedVariants)) return item;
+        if (item.product.id !== productId) return item;
         const maxQty = Math.max(0, item.product.stock);
         return { ...item, quantity: Math.min(quantity, maxQty) };
       })
@@ -138,11 +105,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => setItems([]), []);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => {
-    const adjustment = Object.values(item.selectedVariants).reduce((s, v) => s + (v.priceAdjustment || 0), 0);
-    const price = item.product.price + adjustment;
-    return sum + price * item.quantity;
-  }, 0);
+  const totalPrice = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (
     <CartContext.Provider

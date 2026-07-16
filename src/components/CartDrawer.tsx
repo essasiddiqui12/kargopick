@@ -163,19 +163,12 @@ export default function CartDrawer() {
     }
 
     const orderItems = items.map((item) => {
-      const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
-      const price = item.product.price + adjustment;
-      const variantEntries = Object.entries(item.selectedVariants);
-      const variantName = variantEntries.length > 0
-        ? variantEntries.map(([, v]) => `${v.type}: ${v.value}`).join(", ")
-        : undefined;
+      const price = item.product.price;
       return {
         productId: item.product.id,
         name: item.product.name,
         price,
         quantity: item.quantity,
-        variantName,
-        selectedVariants: item.selectedVariants,
       };
     });
 
@@ -339,20 +332,14 @@ export default function CartDrawer() {
               <div className="rounded-xl bg-surface-50 border border-surface-200 p-4 space-y-3">
                 <p className="text-sm font-medium text-surface-700">Order Summary</p>
                 {items.map((item) => {
-                   const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
-                   const itemPrice = item.product.price + adjustment;
-                   const variantEntries = Object.entries(item.selectedVariants);
-                   const variantLabel = variantEntries.length > 0
-                     ? variantEntries.map(([, v]) => `${v.type}: ${v.value}`).join(", ")
-                     : undefined;
+                   const itemPrice = item.product.price;
                    return (
                      <div
-                       key={`${item.product.id}-${JSON.stringify(item.selectedVariants)}`}
+                       key={item.product.id}
                        className="flex justify-between text-sm text-surface-600 py-1"
                      >
                        <span>
                          {item.product.name}
-                         {variantLabel && <span className="text-surface-400"> ({variantLabel})</span>}
                          {" × "}{item.quantity}
                        </span>
                        <span>{formatPrice(itemPrice * item.quantity)}</span>
@@ -418,84 +405,74 @@ export default function CartDrawer() {
               )}
 
                 {items.map((item) => {
-                  const issue = getIssue(item.product.id);
-                  const atMaxStock =
-                    item.product.stock > 0 && item.quantity >= item.product.stock;
-                  const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
-                  const itemPrice = item.product.price + adjustment;
-                  const flavorVariant = item.selectedVariants["flavor"];
-                  const itemImage = flavorVariant?.image || item.product.image;
-                  const variantEntries = Object.entries(item.selectedVariants);
-                  const variantLabel = variantEntries.length > 0
-                    ? variantEntries.map(([, v]) => `${v.type}: ${v.value}`).join(", ")
-                    : undefined;
+                   const issue = getIssue(item.product.id);
+                   const atMaxStock =
+                     item.product.stock > 0 && item.quantity >= item.product.stock;
+                   const itemPrice = item.product.price;
 
-                 return (
-                   <div
-                     key={`${item.product.id}-${JSON.stringify(item.selectedVariants)}`}
-                     className={`flex gap-4 rounded-xl border p-3 ${
-                       issue
-                         ? "border-rose-200 bg-rose-50/50"
-                         : "border-surface-200 bg-surface-50"
-                     }`}
-                   >
-                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
-                        <Image
-                          src={itemImage}
-                          alt={item.product.name}
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                     <div className="flex flex-1 flex-col min-w-0">
-                       <h3 className="font-medium text-sm text-surface-900 line-clamp-1">
-                         {item.product.name}
-                       </h3>
-                       {variantLabel && (
-                         <p className="text-xs text-surface-500 mt-0.5">{variantLabel}</p>
-                       )}
-                       <p className="text-brand-600 font-semibold text-sm mt-1">
-                         {formatPrice(itemPrice)}
-                       </p>
-                      {issue && (
-                        <p className="mt-1 text-xs font-medium text-rose-600">
-                          {issue.message}
-                        </p>
-                      )}
-                       <div className="mt-auto flex items-center justify-between">
-                         <div className="flex items-center gap-2">
-                           <button
-                             onClick={() =>
-                               updateQuantity(item.product.id, item.quantity - 1, item.selectedVariants)
-                             }
-                             className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
-                           >
-                             <Minus className="h-3 w-3" />
-                           </button>
-                           <span className="w-6 text-center text-sm font-medium text-surface-800">
-                             {item.quantity}
-                           </span>
-                           <button
-                             onClick={() =>
-                               updateQuantity(item.product.id, item.quantity + 1, item.selectedVariants)
-                             }
-                             disabled={atMaxStock || !!issue}
-                             className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                           >
-                             <Plus className="h-3 w-3" />
-                          </button>
-                         </div>
-                          <button
-                            onClick={() => removeFromCart(item.product.id, item.selectedVariants)}
-                            className="text-surface-400 hover:text-rose-500 transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                  return (
+                    <div
+                      key={item.product.id}
+                      className={`flex gap-4 rounded-xl border p-3 ${
+                        issue
+                          ? "border-rose-200 bg-rose-50/50"
+                          : "border-surface-200 bg-surface-50"
+                      }`}
+                    >
+                       <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-100">
+                         <Image
+                           src={item.product.image}
+                           alt={item.product.name}
+                           fill
+                           className="object-contain"
+                         />
                        </div>
-                     </div>
-                   </div>
-                 );
-               })}
+                      <div className="flex flex-1 flex-col min-w-0">
+                        <h3 className="font-medium text-sm text-surface-900 line-clamp-1">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-brand-600 font-semibold text-sm mt-1">
+                          {formatPrice(itemPrice)}
+                        </p>
+                       {issue && (
+                         <p className="mt-1 text-xs font-medium text-rose-600">
+                           {issue.message}
+                         </p>
+                       )}
+                        <div className="mt-auto flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                updateQuantity(item.product.id, item.quantity - 1)
+                              }
+                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="w-6 text-center text-sm font-medium text-surface-800">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateQuantity(item.product.id, item.quantity + 1)
+                              }
+                              disabled={atMaxStock || !!issue}
+                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <Plus className="h-3 w-3" />
+                           </button>
+                          </div>
+                           <button
+                             onClick={() => removeFromCart(item.product.id)}
+                             className="text-surface-400 hover:text-rose-500 transition-colors"
+                           >
+                             <Trash2 className="h-4 w-4" />
+                           </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
 
               <CouponInput
                 subtotal={totalPrice}

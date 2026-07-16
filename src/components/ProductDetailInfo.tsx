@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight, Star, ShieldCheck, MessageCircle, Truck } from "lucide-react";
-import { Product, ProductVariant } from "@/types";
+import { Product } from "@/types";
 import { categories, formatPrice } from "@/data/products";
 import { StockStatus, getStockStatus } from "@/lib/products";
 import AddToCartButton from "@/components/AddToCartButton";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import ProductDescription from "@/components/ProductDescription";
-import VariantSelector from "@/components/VariantSelector";
 
 function stockPill(status: StockStatus, stock: number) {
   if (status === "out_of_stock") {
@@ -33,17 +31,7 @@ function stockPill(status: StockStatus, stock: number) {
   );
 }
 
-export default function ProductDetailInfo({ 
-  product, 
-  onVariantImageChange,
-  selectedVariants,
-  onSelectedVariantsChange
-}: { 
-  product: Product;
-  onVariantImageChange?: (url: string) => void;
-  selectedVariants: Record<string, ProductVariant>;
-  onSelectedVariantsChange: (selected: Record<string, ProductVariant>) => void;
-}) {
+export default function ProductDetailInfo({ product }: { product: Product }) {
   const category = categories.find((c) => c.id === product.category);
   const stockStatus = getStockStatus(product);
   const hasDiscount =
@@ -53,20 +41,6 @@ export default function ProductDetailInfo({
         ((product.originalPrice! - product.price) / product.originalPrice!) * 100
       )
     : 0;
-
-  const currentPrice = product.price + Object.values(selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
-
-  const selectedVariantForCart = Object.values(selectedVariants)[0] || undefined;
-
-  function handleVariantChange(selected: Record<string, ProductVariant>) {
-    onSelectedVariantsChange(selected);
-    if (onVariantImageChange) {
-      const flavorVariant = selected["flavor"];
-      const anyVariant = Object.values(selected)[0];
-      const imageUrl = flavorVariant?.image || anyVariant?.image || product.images?.[0] || product.image || "";
-      onVariantImageChange(imageUrl);
-    }
-  }
 
   return (
     <div className="static lg:sticky lg:top-24 lg:self-start">
@@ -113,7 +87,7 @@ export default function ProductDetailInfo({
         <div className="mt-6 border-t border-surface-100 pt-6">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="text-3xl font-bold text-brand-600" id="product-price">
-              {formatPrice(currentPrice)}
+              {formatPrice(product.price)}
             </span>
             {hasDiscount && (
               <>
@@ -160,14 +134,6 @@ export default function ProductDetailInfo({
           </dl>
         )}
 
-        <div className="mt-4 sm:mt-6">
-          <VariantSelector
-            product={product}
-            selectedVariants={selectedVariants}
-            onSelectionChange={handleVariantChange}
-          />
-        </div>
-
         <ul className="mt-4 sm:mt-6 space-y-2 text-sm text-surface-600">
           <li className="flex items-center gap-2.5">
             <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-500" />
@@ -184,7 +150,7 @@ export default function ProductDetailInfo({
         </ul>
 
         <div className="mt-6 sm:mt-8 space-y-3 border-t border-surface-100 pt-4 sm:pt-6">
-          <AddToCartButton product={product} selectedVariants={selectedVariants} fullWidth />
+          <AddToCartButton product={product} fullWidth />
           <WhatsAppShareButton product={product} fullWidth />
         </div>
       </div>
@@ -209,25 +175,23 @@ export function ProductBreadcrumbs({
       <Link href="/" className="hover:text-brand-600 transition-colors">
         Home
       </Link>
-      <ChevronRight className="h-3.5 w-3.5 text-surface-300" />
+      <ChevronRight className="h-4 w-4" />
       <Link href="/products" className="hover:text-brand-600 transition-colors">
         Products
       </Link>
       {category && (
         <>
-          <ChevronRight className="h-3.5 w-3.5 text-surface-300" />
+          <ChevronRight className="h-4 w-4" />
           <Link
-            href={`/products?category=${categoryId}`}
+            href={`/products?category=${category.id}`}
             className="hover:text-brand-600 transition-colors"
           >
             {category.name}
           </Link>
         </>
       )}
-      <ChevronRight className="h-3.5 w-3.5 text-surface-300" />
-      <span className="font-medium text-surface-800 line-clamp-1 min-w-0">
-        {productName}
-      </span>
+      <ChevronRight className="h-4 w-4" />
+      <span className="text-surface-800 font-medium truncate">{productName}</span>
     </nav>
   );
 }

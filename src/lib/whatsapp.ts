@@ -95,13 +95,9 @@ export function buildOrderMessage(
     return buildNewOrderAlertMessage({
       orderId,
       items: items.map((item) => {
-        const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
-        const price = item.product.price + adjustment;
-        const variantLabel = Object.keys(item.selectedVariants).length > 0
-          ? ` (${Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})`
-          : "";
+        const price = item.product.price;
         return {
-          name: `${item.product.name}${variantLabel}`,
+          name: item.product.name,
           price,
           quantity: item.quantity,
         };
@@ -118,14 +114,10 @@ export function buildOrderMessage(
   const lines = [
     `Hi! I'd like to place an order from *${BRAND_NAME}*:`,
     "",
-    ...items.map((item, i) => {
-      const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
-      const price = item.product.price + adjustment;
-      const variantLabel = Object.keys(item.selectedVariants).length > 0
-        ? ` (${Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})`
-        : "";
-      return `${i + 1}. *${item.product.name}*${variantLabel}\n   Qty: ${item.quantity} × ${formatPrice(price)} = ${formatPrice(price * item.quantity)}`;
-    }),
+    ...items.map(
+      (item, i) =>
+        `${i + 1}. *${item.product.name}*\n   Qty: ${item.quantity} × ${formatPrice(item.product.price)} = ${formatPrice(item.product.price * item.quantity)}`
+    ),
     "",
     `*Total: ${formatPrice(finalTotal)}*`,
     "",

@@ -1,23 +1,5 @@
 export type Category = string;
 
-export type VariantType = "flavor" | "size" | "weight" | "color" | "other";
-
-export interface ProductVariant {
-  id: string;
-  product_id: string;
-  type: VariantType;
-  value: string;
-  priceAdjustment: number;
-  stock: number;
-  sku?: string;
-  barcode?: string;
-  image?: string;
-  weight?: string;
-  is_active: boolean;
-  is_default: boolean;
-  sort_order: number;
-}
-
 export type OrderStatus =
   | "pending"
   | "confirmed"
@@ -43,13 +25,11 @@ export interface Product {
   inStock: boolean;
   weight?: string;
   origin?: string;
-  variants?: ProductVariant[];
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
-  selectedVariants: Record<string, ProductVariant>;
 }
 
 export interface CategoryInfo {
@@ -78,7 +58,6 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  selectedVariants: Record<string, ProductVariant>;
 }
 
 export interface Order {

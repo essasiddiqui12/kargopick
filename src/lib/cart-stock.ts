@@ -18,9 +18,7 @@ export function getCartStockIssue(
     };
   }
 
-  const effectiveStock = Object.keys(item.selectedVariants).length > 0
-    ? live.stock
-    : live.stock;
+  const effectiveStock = live.stock;
 
   if (effectiveStock <= 0) {
     return {
