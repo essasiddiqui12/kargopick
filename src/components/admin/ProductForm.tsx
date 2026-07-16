@@ -113,7 +113,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
             product_id: v.product_id,
             type: v.type || "other",
             value: v.value,
-            priceAdjustment: Number(v.price_adjustment || 0),
+            priceAdjustment: Number(v.priceAdjustment || v.price_adjustment || 0),
             stock: Number(v.stock || 0),
             sku: v.sku,
             barcode: v.barcode,
