@@ -36,7 +36,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem(CART_STORAGE_KEY);
     if (saved) {
       try {
-        setItems(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const migrated = parsed.map((item: any) => {
+          if (item.selectedVariants && typeof item.selectedVariants === "object") {
+            return item as CartItem;
+          }
+          const selectedVariants: Record<string, ProductVariant> = {};
+          if (item.variantId && item.product?.variants) {
+            const variant = item.product.variants.find((v: ProductVariant) => v.id === item.variantId);
+            if (variant) {
+              selectedVariants[variant.type] = variant;
+            }
+          }
+          return {
+            product: item.product,
+            quantity: item.quantity,
+            selectedVariants,
+          } as CartItem;
+        });
+        setItems(migrated);
       } catch {
         localStorage.removeItem(CART_STORAGE_KEY);
       }
@@ -49,7 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, mounted]);
 
-  const getCartItemKey = (productId: string, selectedVariants: Record<string, ProductVariant>) => {
+  const getCartItemKey = (productId: string, selectedVariants: Record<string, ProductVariant> = {}) => {
     const variantKeys = Object.entries(selectedVariants)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([type, v]) => `${type}:${v.id}`)
@@ -91,22 +109,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId: string, selectedVariants: Record<string, ProductVariant>) => {
+  const removeFromCart = useCallback((productId: string, selectedVariants: Record<string, ProductVariant> = {}) => {
     setItems((prev) =>
-      prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants) !== getCartItemKey(productId, selectedVariants))
+      prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants || {}) !== getCartItemKey(productId, selectedVariants))
     );
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number, selectedVariants: Record<string, ProductVariant>) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, selectedVariants: Record<string, ProductVariant> = {}) => {
     if (quantity <= 0) {
       setItems((prev) =>
-        prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants) !== getCartItemKey(productId, selectedVariants))
+        prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants || {}) !== getCartItemKey(productId, selectedVariants))
       );
       return;
     }
     setItems((prev) =>
       prev.map((item) => {
-        if (getCartItemKey(item.product.id, item.selectedVariants) !== getCartItemKey(productId, selectedVariants)) return item;
+        if (getCartItemKey(item.product.id, item.selectedVariants || {}) !== getCartItemKey(productId, selectedVariants)) return item;
         const maxQty = Math.max(0, item.product.stock);
         return { ...item, quantity: Math.min(quantity, maxQty) };
       })
