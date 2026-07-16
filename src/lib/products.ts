@@ -249,31 +249,65 @@ export async function deleteProduct(id: string): Promise<boolean> {
 }
 
 export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
-  const products = await getProducts();
+  const supabase = createAdminClient();
 
   for (const item of items) {
-    const product = products.find((p) => p.id === item.productId);
-    if (!product) {
-      throw new Error(`Product not found: ${item.name}`);
+    let availableStock = 0;
+
+    if (item.variantId) {
+      const { data: variant } = await supabase
+        .from("product_variants")
+        .select("stock")
+        .eq("id", item.variantId)
+        .maybeSingle();
+
+      availableStock = variant?.stock ?? 0;
+    } else {
+      const { data: product } = await supabase
+        .from("products")
+        .select("stock")
+        .eq("id", item.productId)
+        .maybeSingle();
+
+      availableStock = product?.stock ?? 0;
     }
-    if (product.stock < item.quantity) {
+
+    if (availableStock < item.quantity) {
       throw new Error(
-        `Insufficient stock for ${product.name}. Only ${product.stock} left.`
+        `Insufficient stock for ${item.name}. Only ${availableStock} left.`
       );
     }
   }
 
-  const supabase = createAdminClient();
-
   for (const item of items) {
-    const product = products.find((p) => p.id === item.productId);
-    if (!product) continue;
-    const stock = Math.max(0, product.stock - item.quantity);
-    const { error } = await supabase
-      .from("products")
-      .update({ stock, in_stock: stock > 0 })
-      .eq("id", item.productId);
+    if (item.variantId) {
+      const { data: variant } = await supabase
+        .from("product_variants")
+        .select("stock")
+        .eq("id", item.variantId)
+        .maybeSingle();
 
-    if (error) throw new Error(error.message);
+      if (variant) {
+        const newStock = Math.max(0, variant.stock - item.quantity);
+        await supabase
+          .from("product_variants")
+          .update({ stock: newStock })
+          .eq("id", item.variantId);
+      }
+    } else {
+      const { data: product } = await supabase
+        .from("products")
+        .select("stock")
+        .eq("id", item.productId)
+        .maybeSingle();
+
+      if (product) {
+        const newStock = Math.max(0, product.stock - item.quantity);
+        await supabase
+          .from("products")
+          .update({ stock: newStock, in_stock: newStock > 0 })
+          .eq("id", item.productId);
+      }
+    }
   }
 }

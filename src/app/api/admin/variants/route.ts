@@ -16,11 +16,19 @@ export async function GET(request: NextRequest) {
     if (authError) return authError;
 
     const supabase = createAdminClient();
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const productId = searchParams.get("product_id");
+
+    let query = supabase
       .from("product_variants")
       .select("*")
-      .order("product_id", { ascending: true })
       .order("sort_order", { ascending: true });
+
+    if (productId) {
+      query = query.eq("product_id", productId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: "Failed to fetch variants" }, { status: 500 });

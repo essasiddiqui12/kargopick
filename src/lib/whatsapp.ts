@@ -94,11 +94,22 @@ export function buildOrderMessage(
   if (orderId && customer) {
     return buildNewOrderAlertMessage({
       orderId,
-      items: items.map((item) => ({
-        name: item.product.name,
-        price: item.product.price,
-        quantity: item.quantity,
-      })),
+      items: items.map((item) => {
+        const variation = item.variantId
+          ? item.product.variants?.find((v) => v.id === item.variantId)
+          : undefined;
+        const price = item.product.price + (variation?.priceAdjustment ?? 0);
+        const variantLabel = variation
+          ? `${variation.type}: ${variation.value}`
+          : undefined;
+        return {
+          name: variantLabel
+            ? `${item.product.name} (${variantLabel})`
+            : item.product.name,
+          price,
+          quantity: item.quantity,
+        };
+      }),
       subtotal,
       discount: coupon?.discount,
       couponCode: coupon?.code,
@@ -111,10 +122,16 @@ export function buildOrderMessage(
   const lines = [
     `Hi! I'd like to place an order from *${BRAND_NAME}*:`,
     "",
-    ...items.map(
-      (item, i) =>
-        `${i + 1}. *${item.product.name}*\n   Qty: ${item.quantity} × ${formatPrice(item.product.price)} = ${formatPrice(item.product.price * item.quantity)}`
-    ),
+    ...items.map((item, i) => {
+      const variation = item.variantId
+        ? item.product.variants?.find((v) => v.id === item.variantId)
+        : undefined;
+      const price = item.product.price + (variation?.priceAdjustment ?? 0);
+      const variantLabel = variation
+        ? ` (${variation.type}: ${variation.value})`
+        : "";
+      return `${i + 1}. *${item.product.name}*${variantLabel}\n   Qty: ${item.quantity} × ${formatPrice(price)} = ${formatPrice(price * item.quantity)}`;
+    }),
     "",
     `*Total: ${formatPrice(finalTotal)}*`,
     "",

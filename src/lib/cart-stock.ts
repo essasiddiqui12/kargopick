@@ -18,7 +18,11 @@ export function getCartStockIssue(
     };
   }
 
-  if (live.stock <= 0 || !live.inStock) {
+  const effectiveStock = item.variantId
+    ? live.variants?.find((v) => v.id === item.variantId)?.stock ?? live.stock
+    : live.stock;
+
+  if (effectiveStock <= 0) {
     return {
       productId: item.product.id,
       name: live.name,
@@ -26,11 +30,11 @@ export function getCartStockIssue(
     };
   }
 
-  if (item.quantity > live.stock) {
+  if (item.quantity > effectiveStock) {
     return {
       productId: item.product.id,
       name: live.name,
-      message: `Only ${live.stock} left — reduce quantity to ${live.stock}`,
+      message: `Only ${effectiveStock} left — reduce quantity to ${effectiveStock}`,
     };
   }
 

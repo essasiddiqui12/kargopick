@@ -65,7 +65,13 @@ export default async function AdminOrdersPage() {
                     <ul className="space-y-1 text-xs text-surface-600">
                       {order.items.map((item, i) => (
                         <li key={i}>
-                          {item.name} × {item.quantity}
+                          {item.name}
+                          {item.variantType && item.variantValue && (
+                            <span className="text-surface-500">
+                              {" "}({item.variantType}: {item.variantValue})
+                            </span>
+                          )}
+                          {" × "}{item.quantity}
                         </li>
                       ))}
                     </ul>
