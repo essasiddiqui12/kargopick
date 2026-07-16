@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Product, Category } from "@/types";
+import { Product, Category, ProductAttributeAssignment } from "@/types";
 import { categories } from "@/data/products";
 import { Loader2 } from "lucide-react";
 import MultiImageUploadField from "@/components/admin/MultiImageUploadField";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import { LowStockHint } from "@/components/admin/StockStatusBadge";
+import AttributeAssignmentForm from "@/components/admin/AttributeAssignmentForm";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -38,6 +39,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   const [error, setError] = useState("");
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+  const [assignments, setAssignments] = useState<ProductAttributeAssignment[]>([]);
 
   const [form, setForm] = useState(() => {
     if (!initialData) return emptyForm;
@@ -98,6 +100,23 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
 
     fetchSubcategories();
   }, [form.category]);
+
+  useEffect(() => {
+    async function fetchAssignments() {
+      if (!initialData?.id) return;
+      try {
+        const res = await fetch(`/api/admin/attribute-assignments?product_id=${initialData.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setAssignments(data);
+        }
+      } catch {
+        // silently fail
+      }
+    }
+
+    fetchAssignments();
+  }, [initialData?.id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -366,13 +385,13 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
           <div className="sm:col-span-2 border-t border-surface-200 pt-6">
             <h3 className="text-lg font-semibold text-surface-900 mb-4">Product Attributes & Variants</h3>
             <p className="text-sm text-surface-500 mb-4">
-              Assign attributes to this product and generate variants. Attributes marked as "Creates Variants" will automatically generate variant combinations.
+              Assign attributes to this product and generate variants. Attributes marked as &quot;Creates Variants&quot; will automatically generate variant combinations.
             </p>
-            <div className="rounded-xl border border-dashed border-surface-300 bg-surface-50 p-6 text-center">
-              <p className="text-sm text-surface-500">
-                Attribute management coming soon. Use the Attributes page to define global attributes, then assign them here.
-              </p>
-            </div>
+            <AttributeAssignmentForm
+              productId={initialData.id}
+              assignments={assignments}
+              onChange={setAssignments}
+            />
           </div>
         )}
       </div>
