@@ -65,17 +65,32 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="mt-1 text-xs text-surface-400">{product.weight}</p>
         )}
 
-        <div className="mt-auto pt-3 flex items-center justify-between">
-          <div>
-            <span className="text-lg font-bold text-brand-600">
-              {formatPrice(product.price)}
-            </span>
-            {product.originalPrice && (
-              <span className="ml-2 text-sm text-surface-400 line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
+         <div className="mt-auto pt-3 flex items-center justify-between">
+           <div>
+             {product.variants && product.variants.length > 0 ? (
+               <>
+                 <span className="text-lg font-bold text-brand-600">
+                   From {formatPrice(product.price)}
+                 </span>
+                 {product.originalPrice && (
+                   <span className="ml-2 text-sm text-surface-400 line-through">
+                     {formatPrice(product.originalPrice)}
+                   </span>
+                 )}
+               </>
+             ) : (
+               <>
+                 <span className="text-lg font-bold text-brand-600">
+                   {formatPrice(product.price)}
+                 </span>
+                 {product.originalPrice && (
+                   <span className="ml-2 text-sm text-surface-400 line-through">
+                     {formatPrice(product.originalPrice)}
+                   </span>
+                 )}
+               </>
+             )}
+           </div>
 
           <button
             onClick={() => addToCart(product)}

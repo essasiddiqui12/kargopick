@@ -1,4 +1,4 @@
-import { Product, Coupon, Order, OrderItem, OrderStatus } from "@/types";
+import { Product, Coupon, Order, OrderItem, OrderStatus, ProductVariant } from "@/types";
 
 export function normalizeProductImages(
   image?: string,
@@ -71,6 +71,41 @@ export function rowToProduct(row: Record<string, unknown>): Product {
     inStock: Boolean(row.in_stock),
     weight: (row.weight as string) || undefined,
     origin: (row.origin as string) || undefined,
+    variants: (row.variants as ProductVariant[] | undefined) || [],
+  };
+}
+
+export function variantToRow(variant: Partial<ProductVariant> & { id?: string }) {
+  return {
+    id: variant.id,
+    product_id: variant.productId,
+    name: variant.name,
+    sku: variant.sku ?? null,
+    price: variant.price,
+    original_price: variant.originalPrice ?? null,
+    stock: variant.stock,
+    image: variant.image ?? null,
+    attributes: variant.attributes ?? {},
+    is_default: variant.isDefault ?? false,
+    sort_order: variant.sortOrder ?? 0,
+    is_active: variant.isActive ?? true,
+  };
+}
+
+export function rowToVariant(row: Record<string, unknown>): ProductVariant {
+  return {
+    id: row.id as string,
+    productId: row.product_id as string,
+    name: row.name as string,
+    sku: (row.sku as string) || undefined,
+    price: Number(row.price),
+    originalPrice: row.original_price ? Number(row.original_price) : undefined,
+    stock: Number(row.stock ?? 0),
+    image: (row.image as string) || undefined,
+    attributes: (row.attributes as Record<string, string>) || {},
+    isDefault: Boolean(row.is_default),
+    sortOrder: Number(row.sort_order ?? 0),
+    isActive: Boolean(row.is_active),
   };
 }
 

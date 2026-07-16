@@ -7,6 +7,21 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  sku?: string;
+  price: number;
+  originalPrice?: number;
+  stock: number;
+  image?: string;
+  attributes: Record<string, string>;
+  isDefault: boolean;
+  sortOrder: number;
+  isActive: boolean;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -25,10 +40,13 @@ export interface Product {
   inStock: boolean;
   weight?: string;
   origin?: string;
+  variants?: ProductVariant[];
 }
 
 export interface CartItem {
   product: Product;
+  variantId?: string;
+  variantName?: string;
   quantity: number;
 }
 
@@ -58,6 +76,8 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
+  variantId?: string;
+  variantName?: string;
 }
 
 export interface Order {

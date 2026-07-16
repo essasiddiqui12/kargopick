@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { productToRow, rowToProduct } from "@/lib/supabase/mappers";
-import { OrderItem, Product, ProductFilters } from "@/types";
+import { productToRow, rowToProduct, rowToVariant, variantToRow } from "@/lib/supabase/mappers";
+import { OrderItem, Product, ProductVariant, ProductFilters } from "@/types";
 
 export const LOW_STOCK_THRESHOLD = Number(
   process.env.ADMIN_LOW_STOCK_THRESHOLD ?? 5
@@ -9,8 +9,6 @@ export const LOW_STOCK_THRESHOLD = Number(
 export type StockStatus = "in_stock" | "low_stock" | "out_of_stock";
 
 export function normalizeProduct(product: Product): Product {
-  const stock =
-    product.stock ?? (product.inStock ? LOW_STOCK_THRESHOLD + 5 : 0);
   const images =
     product.images?.length > 0
       ? product.images
@@ -18,7 +16,27 @@ export function normalizeProduct(product: Product): Product {
         ? [product.image]
         : [];
   const image = images[0] ?? product.image ?? "";
-  return { ...product, image, images, stock, inStock: stock > 0 };
+
+  let stock = product.stock ?? (product.inStock ? LOW_STOCK_THRESHOLD + 5 : 0);
+  let price = product.price;
+  let originalPrice = product.originalPrice;
+  let inStock = product.inStock;
+
+  if (product.variants && product.variants.length > 0) {
+    const activeVariants = product.variants.filter((v) => v.isActive);
+    if (activeVariants.length > 0) {
+      price = Math.min(...activeVariants.map((v) => v.price));
+      stock = activeVariants.reduce((sum, v) => sum + v.stock, 0);
+      inStock = stock > 0;
+      const maxOriginal = Math.max(...activeVariants.map((v) => v.originalPrice ?? 0));
+      originalPrice = maxOriginal > 0 ? maxOriginal : undefined;
+    }
+  } else {
+    stock = product.stock ?? (product.inStock ? LOW_STOCK_THRESHOLD + 5 : 0);
+    inStock = stock > 0;
+  }
+
+  return { ...product, image, images, stock, inStock, price, originalPrice };
 }
 
 export function syncStockFields(data: {
@@ -53,7 +71,29 @@ export async function getProducts(): Promise<Product[]> {
     .order("id", { ascending: true });
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => normalizeProduct(rowToProduct(row)));
+  const products = (data ?? []).map((row) => rowToProduct(row));
+
+  const productIds = products.map((p) => p.id);
+  const { data: variants, error: variantsError } = await supabase
+    .from("product_variants")
+    .select("*")
+    .in("product_id", productIds)
+    .order("sort_order", { ascending: true });
+
+  if (variantsError) throw new Error(variantsError.message);
+
+  const variantsByProductId = new Map<string, ProductVariant[]>();
+  for (const row of variants ?? []) {
+    const variant = rowToVariant(row);
+    const list = variantsByProductId.get(variant.productId) || [];
+    list.push(variant);
+    variantsByProductId.set(variant.productId, list);
+  }
+
+  return products.map((p) => ({
+    ...p,
+    variants: variantsByProductId.get(p.id) || [],
+  })).map((p) => normalizeProduct(p));
 }
 
 export async function getProductById(id: string): Promise<Product | undefined> {
@@ -67,7 +107,18 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   if (error) throw new Error(error.message);
   if (!data) return undefined;
 
-  return normalizeProduct(rowToProduct(data));
+  const product = rowToProduct(data);
+
+  const { data: variants, error: variantsError } = await supabase
+    .from("product_variants")
+    .select("*")
+    .eq("product_id", id)
+    .order("sort_order", { ascending: true });
+
+  if (variantsError) throw new Error(variantsError.message);
+
+  const mappedVariants = (variants ?? []).map((row) => rowToVariant(row));
+  return normalizeProduct({ ...product, variants: mappedVariants });
 }
 
 export async function getProductsByCategory(
@@ -224,34 +275,119 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
   const supabase = createAdminClient();
 
   for (const item of items) {
-    const { data: product } = await supabase
-      .from("products")
-      .select("stock")
-      .eq("id", item.productId)
-      .maybeSingle();
+    if (item.variantId) {
+      const { data: variant } = await supabase
+        .from("product_variants")
+        .select("stock")
+        .eq("id", item.variantId)
+        .maybeSingle();
 
-    const availableStock = product?.stock ?? 0;
+      const availableStock = variant?.stock ?? 0;
+      if (availableStock < item.quantity) {
+        throw new Error(
+          `Insufficient stock for ${item.name} (${item.variantName}). Only ${availableStock} left.`
+        );
+      }
+    } else {
+      const { data: product } = await supabase
+        .from("products")
+        .select("stock")
+        .eq("id", item.productId)
+        .maybeSingle();
 
-    if (availableStock < item.quantity) {
-      throw new Error(
-        `Insufficient stock for ${item.name}. Only ${availableStock} left.`
-      );
+      const availableStock = product?.stock ?? 0;
+      if (availableStock < item.quantity) {
+        throw new Error(
+          `Insufficient stock for ${item.name}. Only ${availableStock} left.`
+        );
+      }
     }
   }
 
   for (const item of items) {
-    const { data: product } = await supabase
-      .from("products")
-      .select("stock")
-      .eq("id", item.productId)
-      .maybeSingle();
+    if (item.variantId) {
+      const { data: variant } = await supabase
+        .from("product_variants")
+        .select("stock")
+        .eq("id", item.variantId)
+        .maybeSingle();
 
-    if (product) {
-      const newStock = Math.max(0, product.stock - item.quantity);
-      await supabase
+      if (variant) {
+        const newStock = Math.max(0, variant.stock - item.quantity);
+        await supabase
+          .from("product_variants")
+          .update({ stock: newStock })
+          .eq("id", item.variantId);
+      }
+    } else {
+      const { data: product } = await supabase
         .from("products")
-        .update({ stock: newStock, in_stock: newStock > 0 })
-        .eq("id", item.productId);
+        .select("stock")
+        .eq("id", item.productId)
+        .maybeSingle();
+
+      if (product) {
+        const newStock = Math.max(0, product.stock - item.quantity);
+        await supabase
+          .from("products")
+          .update({ stock: newStock, in_stock: newStock > 0 })
+          .eq("id", item.productId);
+      }
     }
   }
+}
+
+export async function getVariantsByProductId(productId: string): Promise<ProductVariant[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select("*")
+    .eq("product_id", productId)
+    .order("sort_order", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row) => rowToVariant(row));
+}
+
+export async function createVariant(data: Omit<ProductVariant, "id">): Promise<ProductVariant> {
+  const supabase = createAdminClient();
+  const variants = await getVariantsByProductId(data.productId);
+  const id = `var_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+  const variant = { ...data, id };
+  const { error } = await supabase.from("product_variants").insert(variantToRow(variant));
+
+  if (error) throw new Error(error.message);
+  return variant;
+}
+
+export async function updateVariant(id: string, data: Partial<ProductVariant>): Promise<ProductVariant | null> {
+  const supabase = createAdminClient();
+  const { data: existing, error: fetchError } = await supabase
+    .from("product_variants")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (fetchError) throw new Error(fetchError.message);
+  if (!existing) return null;
+
+  const updated = { ...rowToVariant(existing), ...data };
+  const { error } = await supabase
+    .from("product_variants")
+    .update(variantToRow(updated))
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+  return updated;
+}
+
+export async function deleteVariant(id: string): Promise<boolean> {
+  const supabase = createAdminClient();
+  const { error, count } = await supabase
+    .from("product_variants")
+    .delete({ count: "exact" })
+    .eq("id", id);
+
+  if (error) throw new Error(error.message);
+  return (count ?? 0) > 0;
 }

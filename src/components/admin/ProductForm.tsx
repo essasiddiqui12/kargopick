@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Product, Category } from "@/types";
+import { Product, Category, ProductVariant } from "@/types";
 import { categories } from "@/data/products";
 import { Loader2 } from "lucide-react";
 import MultiImageUploadField from "@/components/admin/MultiImageUploadField";
 import VideoUploadField from "@/components/admin/VideoUploadField";
 import { LowStockHint } from "@/components/admin/StockStatusBadge";
+import VariantManager from "@/components/admin/VariantManager";
 
 interface ProductFormProps {
   initialData?: Product;
@@ -38,6 +39,7 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
   const [error, setError] = useState("");
   const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([]);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
 
   const [form, setForm] = useState(() => {
     if (!initialData) return emptyForm;
@@ -98,6 +100,26 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
 
     fetchSubcategories();
   }, [form.category]);
+
+  useEffect(() => {
+    async function fetchVariants() {
+      if (!initialData?.id) return;
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kargopick.vercel.app";
+        const res = await fetch(`${baseUrl}/api/admin/variants?product_id=${initialData.id}`, {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setVariants(data);
+        }
+      } catch {
+        // silently fail
+      }
+    }
+
+    fetchVariants();
+  }, [initialData?.id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -361,6 +383,14 @@ export default function ProductForm({ initialData, isEdit }: ProductFormProps) {
             )}
           </p>
         </div>
+
+        {isEdit && initialData && (
+          <VariantManager
+            productId={initialData.id}
+            variants={variants}
+            onChange={setVariants}
+          />
+        )}
       </div>
 
       <div className="flex gap-3 pt-2">

@@ -24,11 +24,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const orderItems: OrderItem[] = items.map((item: OrderItem) => ({
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      variantId: item.variantId,
+      variantName: item.variantName,
+    }));
+
     const order = await createOrder({
       customerName,
       phone,
       address,
-      items: items as OrderItem[],
+      items: orderItems,
       subtotal: subtotal ?? total,
       discount: discount || undefined,
       couponCode: couponCode || undefined,

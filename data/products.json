@@ -3,8 +3,8 @@
     "id": "1",
     "name": "Gold Standard Whey Protein",
     "description": "24g of pure whey protein isolate per serving. Fast-absorbing formula for post-workout recovery and lean muscle building.",
-    "price": 3499,
-    "originalPrice": 4299,
+    "price": 2499,
+    "originalPrice": 3499,
     "category": "gym-essentials",
     "subcategory": "whey-protein",
     "image": "https://images.unsplash.com/photo-1593095948071-474c5f298f9c?w=600&h=600&fit=crop",
@@ -13,7 +13,51 @@
     "reviews": 324,
     "stock": 25,
     "inStock": true,
-    "weight": "2 kg"
+    "weight": "2 kg",
+    "variants": [
+      {
+        "id": "var_1_1",
+        "productId": "1",
+        "name": "Chocolate / 1 kg",
+        "sku": "GSWP-CHOC-1KG",
+        "price": 2499,
+        "originalPrice": 2999,
+        "stock": 10,
+        "image": "https://images.unsplash.com/photo-1593095948071-474c5f298f9c?w=600&h=600&fit=crop",
+        "attributes": { "flavor": "Chocolate", "size": "1 kg" },
+        "isDefault": true,
+        "sortOrder": 0,
+        "isActive": true
+      },
+      {
+        "id": "var_1_2",
+        "productId": "1",
+        "name": "Chocolate / 2 kg",
+        "sku": "GSWP-CHOC-2KG",
+        "price": 3499,
+        "originalPrice": 4299,
+        "stock": 8,
+        "image": "https://images.unsplash.com/photo-1593095948071-474c5f298f9c?w=600&h=600&fit=crop",
+        "attributes": { "flavor": "Chocolate", "size": "2 kg" },
+        "isDefault": false,
+        "sortOrder": 1,
+        "isActive": true
+      },
+      {
+        "id": "var_1_3",
+        "productId": "1",
+        "name": "Vanilla / 2 kg",
+        "sku": "GSWP-VAN-2KG",
+        "price": 3499,
+        "originalPrice": 4299,
+        "stock": 7,
+        "image": "https://images.unsplash.com/photo-1593095948071-474c5f298f9c?w=600&h=600&fit=crop",
+        "attributes": { "flavor": "Vanilla", "size": "2 kg" },
+        "isDefault": false,
+        "sortOrder": 2,
+        "isActive": true
+      }
+    ]
   },
   {
     "id": "2",
@@ -29,7 +73,37 @@
     "reviews": 189,
     "stock": 18,
     "inStock": true,
-    "weight": "5.4 kg"
+    "weight": "5.4 kg",
+    "variants": [
+      {
+        "id": "var_2_1",
+        "productId": "2",
+        "name": "Chocolate / 5.4 kg",
+        "sku": "MGP-CHOC-5.4KG",
+        "price": 4999,
+        "originalPrice": 5999,
+        "stock": 10,
+        "image": "https://images.unsplash.com/photo-1579722821272-35b8c4de7b8a?w=600&h=600&fit=crop",
+        "attributes": { "flavor": "Chocolate", "size": "5.4 kg" },
+        "isDefault": true,
+        "sortOrder": 0,
+        "isActive": true
+      },
+      {
+        "id": "var_2_2",
+        "productId": "2",
+        "name": "Vanilla / 5.4 kg",
+        "sku": "MGP-VAN-5.4KG",
+        "price": 4999,
+        "originalPrice": 5999,
+        "stock": 8,
+        "image": "https://images.unsplash.com/photo-1579722821272-35b8c4de7b8a?w=600&h=600&fit=crop",
+        "attributes": { "flavor": "Vanilla", "size": "5.4 kg" },
+        "isDefault": false,
+        "sortOrder": 1,
+        "isActive": true
+      }
+    ]
   },
   {
     "id": "3",

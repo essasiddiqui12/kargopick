@@ -95,9 +95,15 @@ export function buildOrderMessage(
     return buildNewOrderAlertMessage({
       orderId,
       items: items.map((item) => {
-        const price = item.product.price;
+        const variant = item.variantId
+          ? item.product.variants?.find((v) => v.id === item.variantId)
+          : undefined;
+        const name = variant
+          ? `${item.product.name} — ${variant.name}`
+          : item.product.name;
+        const price = variant ? variant.price : item.product.price;
         return {
-          name: item.product.name,
+          name,
           price,
           quantity: item.quantity,
         };
@@ -115,8 +121,16 @@ export function buildOrderMessage(
     `Hi! I'd like to place an order from *${BRAND_NAME}*:`,
     "",
     ...items.map(
-      (item, i) =>
-        `${i + 1}. *${item.product.name}*\n   Qty: ${item.quantity} × ${formatPrice(item.product.price)} = ${formatPrice(item.product.price * item.quantity)}`
+      (item, i) => {
+        const variant = item.variantId
+          ? item.product.variants?.find((v) => v.id === item.variantId)
+          : undefined;
+        const name = variant
+          ? `${item.product.name} — ${variant.name}`
+          : item.product.name;
+        const price = variant ? variant.price : item.product.price;
+        return `${i + 1}. *${name}*\n   Qty: ${item.quantity} × ${formatPrice(price)} = ${formatPrice(price * item.quantity)}`;
+      }
     ),
     "",
     `*Total: ${formatPrice(finalTotal)}*`,
@@ -128,9 +142,14 @@ export function buildOrderMessage(
 }
 
 export function buildOrderAlertFromOrder(order: Order): string {
+  const items = order.items.map((item) => ({
+    name: item.variantName ? `${item.name} — ${item.variantName}` : item.name,
+    price: item.price,
+    quantity: item.quantity,
+  }));
   return buildNewOrderAlertMessage({
     orderId: order.id,
-    items: order.items,
+    items,
     subtotal: order.subtotal ?? order.total,
     discount: order.discount,
     couponCode: order.couponCode,

@@ -47,6 +47,48 @@ async function seed() {
     };
   });
 
+  const { error: productsError } = await supabase
+    .from("products")
+    .upsert(productRows, { onConflict: "id" });
+
+  if (productsError) {
+    console.error("Products seed failed:", productsError.message);
+    process.exit(1);
+  }
+
+  const variantRows = [];
+  for (const p of products) {
+    if (p.variants && Array.isArray(p.variants)) {
+      for (const v of p.variants) {
+        variantRows.push({
+          id: v.id,
+          product_id: v.productId || p.id,
+          name: v.name,
+          sku: v.sku ?? null,
+          price: v.price,
+          original_price: v.originalPrice ?? null,
+          stock: v.stock,
+          image: v.image ?? null,
+          attributes: v.attributes ?? {},
+          is_default: v.isDefault ?? false,
+          sort_order: v.sortOrder ?? 0,
+          is_active: v.isActive ?? true,
+        });
+      }
+    }
+  }
+
+  if (variantRows.length > 0) {
+    const { error: variantsError } = await supabase
+      .from("product_variants")
+      .upsert(variantRows, { onConflict: "id" });
+
+    if (variantsError) {
+      console.error("Variants seed failed:", variantsError.message);
+      process.exit(1);
+    }
+  }
+
   const couponRows = coupons.map((c) => ({
     id: c.id,
     code: String(c.code).toUpperCase(),
@@ -60,15 +102,6 @@ async function seed() {
     description: c.description ?? null,
   }));
 
-  const { error: productsError } = await supabase
-    .from("products")
-    .upsert(productRows, { onConflict: "id" });
-
-  if (productsError) {
-    console.error("Products seed failed:", productsError.message);
-    process.exit(1);
-  }
-
   const { error: couponsError } = await supabase
     .from("coupons")
     .upsert(couponRows, { onConflict: "id" });
@@ -78,7 +111,7 @@ async function seed() {
     process.exit(1);
   }
 
-  console.log(`Seeded ${productRows.length} products and ${couponRows.length} coupons.`);
+  console.log(`Seeded ${productRows.length} products, ${variantRows.length} variants, and ${couponRows.length} coupons.`);
 }
 
 seed();

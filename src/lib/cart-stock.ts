@@ -18,6 +18,34 @@ export function getCartStockIssue(
     };
   }
 
+  if (item.variantId && live.variants) {
+    const variant = live.variants.find((v) => v.id === item.variantId);
+    if (!variant) {
+      return {
+        productId: item.product.id,
+        name: item.product.name,
+        message: "Selected option is no longer available — remove from cart",
+      };
+    }
+
+    if (variant.stock <= 0) {
+      return {
+        productId: item.product.id,
+        name: live.name,
+        message: "Out of stock — remove from cart",
+      };
+    }
+
+    if (item.quantity > variant.stock) {
+      return {
+        productId: item.product.id,
+        name: live.name,
+        message: `Only ${variant.stock} left — reduce quantity to ${variant.stock}`,
+      };
+    }
+    return null;
+  }
+
   const effectiveStock = live.stock;
 
   if (effectiveStock <= 0) {

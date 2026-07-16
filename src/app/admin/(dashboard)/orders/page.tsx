@@ -61,20 +61,22 @@ export default async function AdminOrdersPage() {
                       {order.address}
                     </p>
                   </td>
-                  <td className="px-6 py-4">
-                    <ul className="space-y-1 text-xs text-surface-600">
-                      {order.items.map((item, i) => (
-                        <li key={i}>
-                          {item.name} × {item.quantity}
-                        </li>
-                      ))}
-                    </ul>
-                    {order.notes && (
-                      <p className="mt-2 text-xs text-surface-400 italic">
-                        Note: {order.notes}
-                      </p>
-                    )}
-                  </td>
+                   <td className="px-6 py-4">
+                     <ul className="space-y-1 text-xs text-surface-600">
+                       {order.items.map((item, i) => (
+                         <li key={i}>
+                           {item.name}
+                           {item.variantName && <span className="text-surface-400"> — {item.variantName}</span>}
+                           {" × "}{item.quantity}
+                         </li>
+                       ))}
+                     </ul>
+                     {order.notes && (
+                       <p className="mt-2 text-xs text-surface-400 italic">
+                         Note: {order.notes}
+                       </p>
+                     )}
+                   </td>
                   <td className="px-6 py-4">
                     <p className="font-semibold text-brand-600">
                       {formatPrice(order.total)}

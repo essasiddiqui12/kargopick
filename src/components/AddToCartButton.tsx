@@ -7,18 +7,24 @@ import { useCart } from "@/context/CartContext";
 export default function AddToCartButton({
   product,
   fullWidth = false,
+  variantId,
+  variantName,
 }: {
   product: Product;
   fullWidth?: boolean;
+  variantId?: string;
+  variantName?: string;
 }) {
   const { addToCart } = useCart();
 
-  const effectiveStock = product.stock;
+  const effectiveStock = variantId
+    ? (product.variants?.find((v) => v.id === variantId)?.stock ?? product.stock)
+    : product.stock;
   const isOutOfStock = effectiveStock <= 0;
 
   return (
     <button
-      onClick={() => addToCart(product)}
+      onClick={() => addToCart(product, variantId, variantName)}
       disabled={isOutOfStock}
       className={`flex items-center justify-center gap-2 rounded-xl bg-brand-500 py-3.5 text-base font-semibold text-white hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-brand-500/20 ${
         fullWidth ? "w-full" : "w-full sm:w-auto sm:px-10"
