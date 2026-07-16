@@ -93,6 +93,7 @@ export default function VariantManager({ productId, variants, onChange }: Varian
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    console.log("Variant form submitted", { productId, form });
     setSaving(true);
 
     try {
@@ -115,6 +116,7 @@ export default function VariantManager({ productId, variants, onChange }: Varian
             sort_order: form.sortOrder,
           }),
         });
+        console.log("Update variant response:", res.status, await res.clone().text());
         if (!res.ok) throw new Error("Failed to update variant");
         onChange(
           variants.map((v) =>
@@ -140,6 +142,7 @@ export default function VariantManager({ productId, variants, onChange }: Varian
         );
       } else {
         const newId = `variant-${productId}-${Date.now()}`;
+        console.log("Creating variant with ID:", newId);
         const res = await fetch("/api/admin/variants", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -159,7 +162,9 @@ export default function VariantManager({ productId, variants, onChange }: Varian
             sort_order: form.sortOrder,
           }),
         });
-        if (!res.ok) throw new Error("Failed to create variant");
+        const responseText = await res.clone().text();
+        console.log("Create variant response:", res.status, responseText);
+        if (!res.ok) throw new Error("Failed to create variant: " + responseText);
         const newVariant: ProductVariant = {
           id: newId,
           product_id: productId,
@@ -179,8 +184,9 @@ export default function VariantManager({ productId, variants, onChange }: Varian
       }
 
       resetForm();
-    } catch {
-      alert("Failed to save variant");
+    } catch (error) {
+      console.error("Variant save error:", error);
+      alert("Failed to save variant: " + (error instanceof Error ? error.message : "Unknown error"));
     } finally {
       setSaving(false);
     }
