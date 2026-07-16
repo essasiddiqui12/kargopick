@@ -66,9 +66,9 @@ export default async function AdminOrdersPage() {
                       {order.items.map((item, i) => (
                         <li key={i}>
                           {item.name}
-                          {item.variantType && item.variantValue && (
+                          {Object.keys(item.selectedVariants).length > 0 && (
                             <span className="text-surface-500">
-                              {" "}({item.variantType}: {item.variantValue})
+                              {" "}({Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})
                             </span>
                           )}
                           {" × "}{item.quantity}

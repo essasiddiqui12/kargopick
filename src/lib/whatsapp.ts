@@ -95,17 +95,13 @@ export function buildOrderMessage(
     return buildNewOrderAlertMessage({
       orderId,
       items: items.map((item) => {
-        const variation = item.variantId
-          ? item.product.variants?.find((v) => v.id === item.variantId)
-          : undefined;
-        const price = item.product.price + (variation?.priceAdjustment ?? 0);
-        const variantLabel = variation
-          ? `${variation.type}: ${variation.value}`
-          : undefined;
+        const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
+        const price = item.product.price + adjustment;
+        const variantLabel = Object.keys(item.selectedVariants).length > 0
+          ? ` (${Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})`
+          : "";
         return {
-          name: variantLabel
-            ? `${item.product.name} (${variantLabel})`
-            : item.product.name,
+          name: `${item.product.name}${variantLabel}`,
           price,
           quantity: item.quantity,
         };
@@ -123,12 +119,10 @@ export function buildOrderMessage(
     `Hi! I'd like to place an order from *${BRAND_NAME}*:`,
     "",
     ...items.map((item, i) => {
-      const variation = item.variantId
-        ? item.product.variants?.find((v) => v.id === item.variantId)
-        : undefined;
-      const price = item.product.price + (variation?.priceAdjustment ?? 0);
-      const variantLabel = variation
-        ? ` (${variation.type}: ${variation.value})`
+      const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
+      const price = item.product.price + adjustment;
+      const variantLabel = Object.keys(item.selectedVariants).length > 0
+        ? ` (${Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})`
         : "";
       return `${i + 1}. *${item.product.name}*${variantLabel}\n   Qty: ${item.quantity} × ${formatPrice(price)} = ${formatPrice(price * item.quantity)}`;
     }),

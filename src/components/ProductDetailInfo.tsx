@@ -35,10 +35,14 @@ function stockPill(status: StockStatus, stock: number) {
 
 export default function ProductDetailInfo({ 
   product, 
-  onVariantImageChange 
+  onVariantImageChange,
+  selectedVariants,
+  onSelectedVariantsChange
 }: { 
   product: Product;
   onVariantImageChange?: (url: string) => void;
+  selectedVariants: Record<string, ProductVariant>;
+  onSelectedVariantsChange: (selected: Record<string, ProductVariant>) => void;
 }) {
   const category = categories.find((c) => c.id === product.category);
   const stockStatus = getStockStatus(product);
@@ -50,18 +54,17 @@ export default function ProductDetailInfo({
       )
     : 0;
 
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
+  const currentPrice = product.price + Object.values(selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
 
-  const currentPrice = product.price + (selectedVariant?.priceAdjustment ?? 0);
+  const selectedVariantForCart = Object.values(selectedVariants)[0] || undefined;
 
-  function handleVariantChange(variant: ProductVariant | undefined) {
-    setSelectedVariant(variant);
+  function handleVariantChange(selected: Record<string, ProductVariant>) {
+    onSelectedVariantsChange(selected);
     if (onVariantImageChange) {
-      if (variant?.image) {
-        onVariantImageChange(variant.image);
-      } else {
-        onVariantImageChange(product.images?.[0] || product.image || "");
-      }
+      const flavorVariant = selected["flavor"];
+      const anyVariant = Object.values(selected)[0];
+      const imageUrl = flavorVariant?.image || anyVariant?.image || product.images?.[0] || product.image || "";
+      onVariantImageChange(imageUrl);
     }
   }
 
@@ -160,6 +163,7 @@ export default function ProductDetailInfo({
         <div className="mt-4 sm:mt-6">
           <VariantSelector
             product={product}
+            selectedVariants={selectedVariants}
             onSelectionChange={handleVariantChange}
           />
         </div>
@@ -180,7 +184,7 @@ export default function ProductDetailInfo({
         </ul>
 
         <div className="mt-6 sm:mt-8 space-y-3 border-t border-surface-100 pt-4 sm:pt-6">
-          <AddToCartButton product={product} variant={selectedVariant} fullWidth />
+          <AddToCartButton product={product} selectedVariants={selectedVariants} fullWidth />
           <WhatsAppShareButton product={product} fullWidth />
         </div>
       </div>

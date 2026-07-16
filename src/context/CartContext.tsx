@@ -13,9 +13,9 @@ import { CART_STORAGE_KEY } from "@/lib/brand";
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: Product, variant?: ProductVariant) => void;
-  removeFromCart: (productId: string, variationId?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variationId?: string) => void;
+  addToCart: (product: Product, selectedVariants: Record<string, ProductVariant>) => void;
+  removeFromCart: (productId: string, selectedVariants: Record<string, ProductVariant>) => void;
+  updateQuantity: (productId: string, quantity: number, selectedVariants: Record<string, ProductVariant>) => void;
   syncItems: (items: CartItem[]) => void;
   clearCart: () => void;
   totalItems: number;
@@ -49,29 +49,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, mounted]);
 
-  const getCartItemKey = (productId: string, variationId?: string) =>
-    variationId ? `${productId}::${variationId}` : productId;
+  const getCartItemKey = (productId: string, selectedVariants: Record<string, ProductVariant>) => {
+    const variantKeys = Object.entries(selectedVariants)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([type, v]) => `${type}:${v.id}`)
+      .join("|");
+    return variantKeys ? `${productId}::${variantKeys}` : productId;
+  };
 
-  const addToCart = useCallback((product: Product, variant?: ProductVariant) => {
+  const addToCart = useCallback((product: Product, selectedVariants: Record<string, ProductVariant>) => {
     setItems((prev) => {
-      const effectiveStock = variant?.stock ?? product.stock;
+      const totalAdjustment = Object.values(selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
+      const effectiveStock = product.stock;
       if (effectiveStock <= 0) return prev;
 
-      const variantId = variant?.id;
-      const key = getCartItemKey(product.id, variantId);
-      const existing = prev.find((item) => getCartItemKey(item.product.id, item.variantId) === key);
+      const key = getCartItemKey(product.id, selectedVariants);
+      const existing = prev.find((item) => getCartItemKey(item.product.id, item.selectedVariants) === key);
 
       if (existing) {
-        const maxQty = Math.max(0, variant?.stock ?? product.stock);
+        const maxQty = Math.max(0, effectiveStock);
         return prev.map((item) => {
-          if (getCartItemKey(item.product.id, item.variantId) !== key) return item;
+          if (getCartItemKey(item.product.id, item.selectedVariants) !== key) return item;
           return {
             ...item,
             product,
-            variantId: variantId || item.variantId,
-            variantName: variant ? `${variant.type}: ${variant.value}` : item.variantName,
-            variantType: variant?.type || item.variantType,
-            variantValue: variant?.value || item.variantValue,
+            selectedVariants,
             quantity: Math.min(item.quantity + 1, maxQty),
           };
         });
@@ -82,34 +84,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
         {
           product,
           quantity: 1,
-          variantId,
-          variantName: variant ? `${variant.type}: ${variant.value}` : undefined,
-          variantType: variant?.type,
-          variantValue: variant?.value,
+          selectedVariants,
         },
       ];
     });
     setIsCartOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId: string, variationId?: string) => {
+  const removeFromCart = useCallback((productId: string, selectedVariants: Record<string, ProductVariant>) => {
     setItems((prev) =>
-      prev.filter((item) => getCartItemKey(item.product.id, item.variantId) !== getCartItemKey(productId, variationId))
+      prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants) !== getCartItemKey(productId, selectedVariants))
     );
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number, variationId?: string) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, selectedVariants: Record<string, ProductVariant>) => {
     if (quantity <= 0) {
       setItems((prev) =>
-        prev.filter((item) => getCartItemKey(item.product.id, item.variantId) !== getCartItemKey(productId, variationId))
+        prev.filter((item) => getCartItemKey(item.product.id, item.selectedVariants) !== getCartItemKey(productId, selectedVariants))
       );
       return;
     }
     setItems((prev) =>
       prev.map((item) => {
-        if (getCartItemKey(item.product.id, item.variantId) !== getCartItemKey(productId, variationId)) return item;
-        const variation = item.variantId ? item.product.variants?.find((v) => v.id === item.variantId) : undefined;
-        const maxQty = Math.max(0, variation ? variation.stock : item.product.stock);
+        if (getCartItemKey(item.product.id, item.selectedVariants) !== getCartItemKey(productId, selectedVariants)) return item;
+        const maxQty = Math.max(0, item.product.stock);
         return { ...item, quantity: Math.min(quantity, maxQty) };
       })
     );
@@ -123,8 +121,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => {
-    const variation = item.variantId ? item.product.variants?.find((v) => v.id === item.variantId) : undefined;
-    const price = (variation?.priceAdjustment ? item.product.price + variation.priceAdjustment : item.product.price);
+    const adjustment = Object.values(item.selectedVariants).reduce((s, v) => s + (v.priceAdjustment || 0), 0);
+    const price = item.product.price + adjustment;
     return sum + price * item.quantity;
   }, 0);
 

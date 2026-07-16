@@ -6,7 +6,8 @@ import { Product, ProductVariant } from "@/types";
 
 interface VariantSelectorProps {
   product: Product;
-  onSelectionChange: (variant: ProductVariant | undefined) => void;
+  selectedVariants: Record<string, ProductVariant>;
+  onSelectionChange: (selected: Record<string, ProductVariant>) => void;
 }
 
 const VARIANT_TYPE_LABELS: Record<string, string> = {
@@ -17,10 +18,9 @@ const VARIANT_TYPE_LABELS: Record<string, string> = {
   other: "Option",
 };
 
-export default function VariantSelector({ product, onSelectionChange }: VariantSelectorProps) {
+export default function VariantSelector({ product, selectedVariants, onSelectionChange }: VariantSelectorProps) {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Record<string, ProductVariant>>({});
 
   useEffect(() => {
     async function fetchVariants() {
@@ -64,21 +64,22 @@ export default function VariantSelector({ product, onSelectionChange }: VariantS
       .filter((v) => v.is_active)
       .sort((a, b) => a.sort_order - b.sort_order);
 
-    if (activeVariants.length > 0) {
-      const defaultVariant = activeVariants.find((v) => v.is_default) || activeVariants[0];
-      const initial: Record<string, ProductVariant> = {};
-      initial[defaultVariant.type] = defaultVariant;
-      setSelected(initial);
-      onSelectionChange(defaultVariant);
+    if (activeVariants.length > 0 && Object.keys(selectedVariants).length === 0) {
+      const defaults: Record<string, ProductVariant> = {};
+      activeVariants.forEach((v) => {
+        if (v.is_default || !defaults[v.type]) {
+          defaults[v.type] = v;
+        }
+      });
+      if (Object.keys(defaults).length > 0) {
+        onSelectionChange(defaults);
+      }
     }
-  }, [variants, onSelectionChange]);
+  }, [variants, selectedVariants, onSelectionChange]);
 
   function handleSelect(type: string, variant: ProductVariant) {
-    setSelected((prev) => {
-      const next = { ...prev, [type]: variant };
-      return next;
-    });
-    onSelectionChange(variant);
+    const next = { ...selectedVariants, [type]: variant };
+    onSelectionChange(next);
   }
 
   if (loading) {
@@ -101,8 +102,6 @@ export default function VariantSelector({ product, onSelectionChange }: VariantS
       return acc;
     }, {});
 
-  const selectedVariant = Object.values(selected)[0];
-
   return (
     <div className="space-y-4">
       {Object.entries(grouped).map(([type, options]) => (
@@ -114,7 +113,7 @@ export default function VariantSelector({ product, onSelectionChange }: VariantS
             {options
               .sort((a, b) => a.sort_order - b.sort_order)
               .map((option) => {
-                const isSelected = selected[type]?.id === option.id;
+                const isSelected = selectedVariants[type]?.id === option.id;
                 const isOutOfStock = option.stock <= 0;
 
                 if (type === "color") {

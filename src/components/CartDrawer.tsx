@@ -163,19 +163,19 @@ export default function CartDrawer() {
     }
 
     const orderItems = items.map((item) => {
-      const variation = item.variantId
-        ? item.product.variants?.find((v) => v.id === item.variantId)
+      const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
+      const price = item.product.price + adjustment;
+      const variantEntries = Object.entries(item.selectedVariants);
+      const variantName = variantEntries.length > 0
+        ? variantEntries.map(([, v]) => `${v.type}: ${v.value}`).join(", ")
         : undefined;
-      const price = item.product.price + (variation?.priceAdjustment ?? 0);
       return {
         productId: item.product.id,
         name: item.product.name,
         price,
         quantity: item.quantity,
-        variantId: item.variantId,
-        variantName: item.variantName,
-        variantType: item.variantType,
-        variantValue: item.variantValue,
+        variantName,
+        selectedVariants: item.selectedVariants,
       };
     });
 
@@ -339,24 +339,26 @@ export default function CartDrawer() {
               <div className="rounded-xl bg-surface-50 border border-surface-200 p-4 space-y-3">
                 <p className="text-sm font-medium text-surface-700">Order Summary</p>
                 {items.map((item) => {
-                   const variation = item.variantId
-                     ? item.product.variants?.find((v) => v.id === item.variantId)
+                   const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
+                   const itemPrice = item.product.price + adjustment;
+                   const variantEntries = Object.entries(item.selectedVariants);
+                   const variantLabel = variantEntries.length > 0
+                     ? variantEntries.map(([, v]) => `${v.type}: ${v.value}`).join(", ")
                      : undefined;
-                   const itemPrice = item.product.price + (variation?.priceAdjustment ?? 0);
-                  return (
-                    <div
-                      key={`${item.product.id}-${item.variantId || "base"}`}
-                      className="flex justify-between text-sm text-surface-600 py-1"
-                    >
-                      <span>
-                        {item.product.name}
-                        {item.variantName && <span className="text-surface-400"> ({item.variantName})</span>}
-                        {" × "}{item.quantity}
-                      </span>
-                      <span>{formatPrice(itemPrice * item.quantity)}</span>
-                    </div>
-                  );
-                })}
+                   return (
+                     <div
+                       key={`${item.product.id}-${JSON.stringify(item.selectedVariants)}`}
+                       className="flex justify-between text-sm text-surface-600 py-1"
+                     >
+                       <span>
+                         {item.product.name}
+                         {variantLabel && <span className="text-surface-400"> ({variantLabel})</span>}
+                         {" × "}{item.quantity}
+                       </span>
+                       <span>{formatPrice(itemPrice * item.quantity)}</span>
+                     </div>
+                   );
+                 })}
                 <OrderTotals subtotal={totalPrice} coupon={appliedCoupon} />
               </div>
             </div>
@@ -419,15 +421,18 @@ export default function CartDrawer() {
                   const issue = getIssue(item.product.id);
                   const atMaxStock =
                     item.product.stock > 0 && item.quantity >= item.product.stock;
-                  const variation = item.variantId
-                    ? item.product.variants?.find((v) => v.id === item.variantId)
+                  const adjustment = Object.values(item.selectedVariants).reduce((sum, v) => sum + (v.priceAdjustment || 0), 0);
+                  const itemPrice = item.product.price + adjustment;
+                  const flavorVariant = item.selectedVariants["flavor"];
+                  const itemImage = flavorVariant?.image || item.product.image;
+                  const variantEntries = Object.entries(item.selectedVariants);
+                  const variantLabel = variantEntries.length > 0
+                    ? variantEntries.map(([, v]) => `${v.type}: ${v.value}`).join(", ")
                     : undefined;
-                  const itemImage = variation?.image || item.product.image;
-                   const itemPrice = item.product.price + (variation?.priceAdjustment ?? 0);
 
                  return (
                    <div
-                     key={`${item.product.id}-${item.variantId || "base"}`}
+                     key={`${item.product.id}-${JSON.stringify(item.selectedVariants)}`}
                      className={`flex gap-4 rounded-xl border p-3 ${
                        issue
                          ? "border-rose-200 bg-rose-50/50"
@@ -446,8 +451,8 @@ export default function CartDrawer() {
                        <h3 className="font-medium text-sm text-surface-900 line-clamp-1">
                          {item.product.name}
                        </h3>
-                       {item.variantName && (
-                         <p className="text-xs text-surface-500 mt-0.5">{item.variantName}</p>
+                       {variantLabel && (
+                         <p className="text-xs text-surface-500 mt-0.5">{variantLabel}</p>
                        )}
                        <p className="text-brand-600 font-semibold text-sm mt-1">
                          {formatPrice(itemPrice)}
@@ -461,7 +466,7 @@ export default function CartDrawer() {
                          <div className="flex items-center gap-2">
                            <button
                              onClick={() =>
-                               updateQuantity(item.product.id, item.quantity - 1, item.variantId)
+                               updateQuantity(item.product.id, item.quantity - 1, item.selectedVariants)
                              }
                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
                            >
@@ -472,25 +477,25 @@ export default function CartDrawer() {
                            </span>
                            <button
                              onClick={() =>
-                               updateQuantity(item.product.id, item.quantity + 1, item.variantId)
+                               updateQuantity(item.product.id, item.quantity + 1, item.selectedVariants)
                              }
                              disabled={atMaxStock || !!issue}
                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
                            >
                              <Plus className="h-3 w-3" />
                           </button>
-                        </div>
-                         <button
-                           onClick={() => removeFromCart(item.product.id, item.variantId)}
-                           className="text-surface-400 hover:text-rose-500 transition-colors"
-                         >
-                           <Trash2 className="h-4 w-4" />
-                         </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                         </div>
+                          <button
+                            onClick={() => removeFromCart(item.product.id, item.selectedVariants)}
+                            className="text-surface-400 hover:text-rose-500 transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                       </div>
+                     </div>
+                   </div>
+                 );
+               })}
 
               <CouponInput
                 subtotal={totalPrice}

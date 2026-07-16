@@ -252,25 +252,13 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
   const supabase = createAdminClient();
 
   for (const item of items) {
-    let availableStock = 0;
+    const { data: product } = await supabase
+      .from("products")
+      .select("stock")
+      .eq("id", item.productId)
+      .maybeSingle();
 
-    if (item.variantId) {
-      const { data: variant } = await supabase
-        .from("product_variants")
-        .select("stock")
-        .eq("id", item.variantId)
-        .maybeSingle();
-
-      availableStock = variant?.stock ?? 0;
-    } else {
-      const { data: product } = await supabase
-        .from("products")
-        .select("stock")
-        .eq("id", item.productId)
-        .maybeSingle();
-
-      availableStock = product?.stock ?? 0;
-    }
+    const availableStock = product?.stock ?? 0;
 
     if (availableStock < item.quantity) {
       throw new Error(
@@ -280,34 +268,18 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
   }
 
   for (const item of items) {
-    if (item.variantId) {
-      const { data: variant } = await supabase
-        .from("product_variants")
-        .select("stock")
-        .eq("id", item.variantId)
-        .maybeSingle();
+    const { data: product } = await supabase
+      .from("products")
+      .select("stock")
+      .eq("id", item.productId)
+      .maybeSingle();
 
-      if (variant) {
-        const newStock = Math.max(0, variant.stock - item.quantity);
-        await supabase
-          .from("product_variants")
-          .update({ stock: newStock })
-          .eq("id", item.variantId);
-      }
-    } else {
-      const { data: product } = await supabase
+    if (product) {
+      const newStock = Math.max(0, product.stock - item.quantity);
+      await supabase
         .from("products")
-        .select("stock")
-        .eq("id", item.productId)
-        .maybeSingle();
-
-      if (product) {
-        const newStock = Math.max(0, product.stock - item.quantity);
-        await supabase
-          .from("products")
-          .update({ stock: newStock, in_stock: newStock > 0 })
-          .eq("id", item.productId);
-      }
+        .update({ stock: newStock, in_stock: newStock > 0 })
+        .eq("id", item.productId);
     }
   }
 }

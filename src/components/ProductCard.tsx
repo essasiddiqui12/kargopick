@@ -78,7 +78,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           <button
-            onClick={() => addToCart(product)}
+            onClick={() => addToCart(product, {})}
             disabled={!product.inStock}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm shadow-brand-500/25"
             aria-label={`Add ${product.name} to cart`}

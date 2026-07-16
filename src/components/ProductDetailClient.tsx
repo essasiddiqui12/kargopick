@@ -3,12 +3,13 @@
 import { useState } from "react";
 import ProductGallery from "@/components/ProductGallery";
 import ProductDetailInfo, { ProductBreadcrumbs } from "@/components/ProductDetailInfo";
-import { Product } from "@/types";
+import { Product, ProductVariant } from "@/types";
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(
     product.images?.[0] || product.image || ""
   );
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, ProductVariant>>({});
 
   return (
     <>
@@ -33,6 +34,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <ProductDetailInfo
             product={product}
             onVariantImageChange={setActiveImage}
+            selectedVariants={selectedVariants}
+            onSelectedVariantsChange={setSelectedVariants}
           />
         </div>
       </div>

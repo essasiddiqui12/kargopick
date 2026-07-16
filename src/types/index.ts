@@ -49,10 +49,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
-  variantId?: string;
-  variantName?: string;
-  variantType?: string;
-  variantValue?: string;
+  selectedVariants: Record<string, ProductVariant>;
 }
 
 export interface CategoryInfo {
@@ -81,10 +78,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  variantId?: string;
-  variantName?: string;
-  variantType?: string;
-  variantValue?: string;
+  selectedVariants: Record<string, ProductVariant>;
 }
 
 export interface Order {

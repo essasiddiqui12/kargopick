@@ -18,8 +18,8 @@ export function getCartStockIssue(
     };
   }
 
-  const effectiveStock = item.variantId
-    ? live.variants?.find((v) => v.id === item.variantId)?.stock ?? live.stock
+  const effectiveStock = Object.keys(item.selectedVariants).length > 0
+    ? live.stock
     : live.stock;
 
   if (effectiveStock <= 0) {

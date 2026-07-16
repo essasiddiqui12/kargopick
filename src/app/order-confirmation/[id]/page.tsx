@@ -70,9 +70,9 @@ export default async function OrderConfirmationPage({
                 >
                   <span className="text-surface-700">
                     {item.name}
-                    {item.variantType && item.variantValue && (
+                    {Object.keys(item.selectedVariants).length > 0 && (
                       <span className="text-surface-500">
-                        {" "}({item.variantType}: {item.variantValue})
+                        {" "}({Object.entries(item.selectedVariants).map(([, v]) => `${v.type}: ${v.value}`).join(", ")})
                       </span>
                     )}
                     {" × "}{item.quantity}
