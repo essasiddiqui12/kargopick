@@ -91,10 +91,10 @@ export default function ProductDetailInfo({
   const displayImage = selectedVariant?.image || product.image;
 
   useEffect(() => {
-    if (onVariantImageChange && displayImage) {
-      onVariantImageChange(displayImage);
+    if (onVariantImageChange && selectedVariant?.image) {
+      onVariantImageChange(selectedVariant.image);
     }
-  }, [displayImage, onVariantImageChange]);
+  }, [selectedVariant?.image, onVariantImageChange]);
 
   const stockStatus = getStockStatus({ ...product, stock: displayStock, price: displayPrice });
 

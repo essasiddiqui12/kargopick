@@ -174,6 +174,7 @@ export default function CartDrawer() {
         quantity: item.quantity,
         variantId: item.variantId,
         variantName: item.variantName,
+        sku: variant?.sku,
       };
     });
 

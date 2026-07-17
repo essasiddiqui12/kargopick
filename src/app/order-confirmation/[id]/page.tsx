@@ -71,6 +71,7 @@ export default async function OrderConfirmationPage({
                   <span className="text-surface-700">
                     {item.name}
                     {item.variantName && <span className="text-surface-400"> — {item.variantName}</span>}
+                    {item.sku && <span className="text-surface-400"> — SKU: {item.sku}</span>}
                     {" × "}{item.quantity}
                   </span>
                   <span className="font-medium text-surface-900">

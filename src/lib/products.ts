@@ -314,6 +314,11 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
 
       if (variant) {
         const newStock = Math.max(0, variant.stock - item.quantity);
+        if (newStock < 0) {
+          throw new Error(
+            `Insufficient stock for ${item.name} (${item.variantName}). Only ${variant.stock} left.`
+          );
+        }
         await supabase
           .from("product_variants")
           .update({ stock: newStock })
@@ -328,6 +333,11 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
 
       if (product) {
         const newStock = Math.max(0, product.stock - item.quantity);
+        if (newStock < 0) {
+          throw new Error(
+            `Insufficient stock for ${item.name}. Only ${product.stock} left.`
+          );
+        }
         await supabase
           .from("products")
           .update({ stock: newStock, in_stock: newStock > 0 })

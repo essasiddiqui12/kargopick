@@ -6,6 +6,7 @@ import { Star, ShoppingCart } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice } from "@/data/products";
 import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
+  const router = useRouter();
 
   const discount = product.originalPrice
     ? Math.round(
@@ -20,11 +22,19 @@ export default function ProductCard({ product }: ProductCardProps) {
       )
     : 0;
 
+  const hasVariants = product.variants && product.variants.length > 0;
+
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-surface-200 bg-white/80 backdrop-blur-sm shadow-sm transition-all hover:border-brand-300 hover:shadow-lg hover:shadow-brand-500/10">
       <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden bg-surface-100">
         <Image
-          src={product.image}
+          src={
+            hasVariants
+              ? (product.variants!.find((v) => v.isDefault && v.isActive)?.image ||
+                  product.variants!.find((v) => v.isActive)?.image ||
+                  product.image)
+              : product.image
+          }
           alt={product.name}
           fill
           className="object-contain bg-surface-100 transition-transform duration-500 group-hover:scale-105"
@@ -67,12 +77,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
          <div className="mt-auto pt-3 flex items-center justify-between">
            <div>
-             {product.variants && product.variants.length > 0 ? (
+             {hasVariants ? (
                <>
                  <span className="text-lg font-bold text-brand-600">
                    From {formatPrice(product.price)}
                  </span>
-                 {product.originalPrice && (
+                 {product.originalPrice && product.originalPrice > product.price && (
                    <span className="ml-2 text-sm text-surface-400 line-through">
                      {formatPrice(product.originalPrice)}
                    </span>
@@ -83,7 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                  <span className="text-lg font-bold text-brand-600">
                    {formatPrice(product.price)}
                  </span>
-                 {product.originalPrice && (
+                 {product.originalPrice && product.originalPrice > product.price && (
                    <span className="ml-2 text-sm text-surface-400 line-through">
                      {formatPrice(product.originalPrice)}
                    </span>
@@ -92,16 +102,26 @@ export default function ProductCard({ product }: ProductCardProps) {
              )}
            </div>
 
-          <button
-            onClick={() => addToCart(product)}
-            disabled={!product.inStock}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm shadow-brand-500/25"
-            aria-label={`Add ${product.name} to cart`}
-          >
-            <ShoppingCart className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+           {hasVariants ? (
+             <Link
+               href={`/products/${product.id}`}
+               className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/25"
+               aria-label={`Select options for ${product.name}`}
+             >
+               <ShoppingCart className="h-4 w-4" />
+             </Link>
+           ) : (
+             <button
+               onClick={() => addToCart(product)}
+               disabled={!product.inStock}
+               className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm shadow-brand-500/25"
+               aria-label={`Add ${product.name} to cart`}
+             >
+               <ShoppingCart className="h-4 w-4" />
+             </button>
+           )}
+         </div>
+       </div>
     </div>
   );
 }

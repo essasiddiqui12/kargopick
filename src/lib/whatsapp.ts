@@ -37,7 +37,7 @@ export function getWhatsAppUrlForPhone(phone: string, message: string): string {
 
 export function buildNewOrderAlertMessage(data: {
   orderId: string;
-  items: { name: string; price: number; quantity: number }[];
+  items: { name: string; price: number; quantity: number; sku?: string }[];
   subtotal: number;
   discount?: number;
   couponCode?: string;
@@ -57,8 +57,10 @@ export function buildNewOrderAlertMessage(data: {
     "",
     "*Order Items*",
     ...data.items.map(
-      (item, i) =>
-        `${i + 1}. *${item.name}*\n   Qty: ${item.quantity} × ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`
+      (item, i) => {
+        const skuLine = item.sku ? `\n   SKU: ${item.sku}` : "";
+        return `${i + 1}. *${item.name}*${skuLine}\n   Qty: ${item.quantity} × ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`;
+      }
     ),
     "",
     `Subtotal: ${formatPrice(data.subtotal)}`,
@@ -106,6 +108,7 @@ export function buildOrderMessage(
           name,
           price,
           quantity: item.quantity,
+          sku: variant?.sku,
         };
       }),
       subtotal,
@@ -129,7 +132,8 @@ export function buildOrderMessage(
           ? `${item.product.name} — ${variant.name}`
           : item.product.name;
         const price = variant ? variant.price : item.product.price;
-        return `${i + 1}. *${name}*\n   Qty: ${item.quantity} × ${formatPrice(price)} = ${formatPrice(price * item.quantity)}`;
+        const skuLine = variant?.sku ? `\n   SKU: ${variant.sku}` : "";
+        return `${i + 1}. *${name}*${skuLine}\n   Qty: ${item.quantity} × ${formatPrice(price)} = ${formatPrice(price * item.quantity)}`;
       }
     ),
     "",
@@ -146,6 +150,7 @@ export function buildOrderAlertFromOrder(order: Order): string {
     name: item.variantName ? `${item.name} — ${item.variantName}` : item.name,
     price: item.price,
     quantity: item.quantity,
+    sku: item.sku,
   }));
   return buildNewOrderAlertMessage({
     orderId: order.id,
