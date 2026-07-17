@@ -221,7 +221,6 @@ export default function CartDrawer() {
       setStockIssues([]);
       setIsCartOpen(false);
       router.push(`/order-confirmation/${data.id}`);
-      window.open(url, "_blank");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckCircle, Package, MapPin, Phone, MessageCircle } from "lucide-react";
 import { getOrderById } from "@/lib/orders";
 import { formatPrice } from "@/data/products";
-import { buildEnquiryMessage, getWhatsAppUrl } from "@/lib/whatsapp";
+import { buildOrderAlertFromOrder, getWhatsAppUrl } from "@/lib/whatsapp";
 import { BRAND_NAME } from "@/lib/brand";
 import OrderStatusTimeline from "@/components/OrderStatusTimeline";
 
@@ -36,7 +36,7 @@ export default async function OrderConfirmationPage({
     );
   }
 
-  const whatsappMessage = `${buildEnquiryMessage()}\n\nMy order ID: ${order.id}`;
+  const whatsappMessage = buildOrderAlertFromOrder(order);
   const whatsappUrl = getWhatsAppUrl(whatsappMessage);
 
   return (
@@ -126,22 +126,13 @@ export default async function OrderConfirmationPage({
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-surface-900 mb-4">
-              Order Status
+          <div className="rounded-2xl border border-[#25D366]/30 bg-[#25D366]/5 p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-surface-900 mb-2 flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-[#128C7E]" />
+              Confirm Your Order
             </h2>
-            <OrderStatusTimeline status={order.status} />
-            <p className="mt-4 text-xs text-surface-500">
-              Placed on {new Date(order.createdAt).toLocaleString("en-IN")}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-surface-900 mb-2">
-              Need help?
-            </h2>
-            <p className="text-sm text-surface-600 mb-4">
-              Questions about your order? Chat with us on WhatsApp.
+            <p className="text-sm text-surface-700 mb-4">
+              Your order has been placed successfully! Please confirm it on WhatsApp to proceed with processing.
             </p>
             <a
               href={whatsappUrl}
@@ -150,8 +141,18 @@ export default async function OrderConfirmationPage({
               className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a]"
             >
               <MessageCircle className="h-4 w-4" />
-              Chat on WhatsApp
+              Send Order on WhatsApp
             </a>
+          </div>
+
+          <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-surface-900 mb-4">
+              Order Status
+            </h2>
+            <OrderStatusTimeline status={order.status} />
+            <p className="mt-4 text-xs text-surface-500">
+              Placed on {new Date(order.createdAt).toLocaleString("en-IN")}
+            </p>
           </div>
 
           <div className="flex flex-col gap-2">
