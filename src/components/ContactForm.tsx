@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, MapPin, Clock, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, MessageCircle, User } from "lucide-react";
 import { BRAND_EMAIL } from "@/lib/brand";
 import { formatWhatsAppDisplay, getWhatsAppUrl, buildEnquiryMessage } from "@/lib/whatsapp";
 
@@ -11,83 +11,53 @@ export default function ContactForm() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="text-3xl font-bold tracking-tight text-surface-900 sm:text-4xl">
-        Contact Us
+        Get in Touch
       </h1>
       <p className="mt-3 text-base text-surface-600">
-        Have a question about an order, product, or partnership? Reach out and we’ll get back to you as soon as possible.
+        We are here to assist you with your fitness journey and shopping needs. Whether you have questions about a product or need help with an order, feel free to reach out to us.
       </p>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2">
-        <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <Mail className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-surface-500">Email</p>
-              <p className="text-sm font-semibold text-surface-900">{BRAND_EMAIL}</p>
-            </div>
+      <div className="mt-4 rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-surface-900">Kargopick International</h2>
+        <div className="mt-3 grid gap-3 text-sm text-surface-700">
+          <div className="flex items-start gap-2">
+            <User className="h-4 w-4 text-brand-600 mt-0.5" />
+            <span><span className="font-medium">Proprietor:</span> Mohammad Hamid Shaikh</span>
           </div>
-          <p className="mt-3 text-xs text-surface-500">
-            For order issues, product questions, or business inquiries.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <Phone className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-surface-500">WhatsApp</p>
-              <p className="text-sm font-semibold text-surface-900">{phoneDisplay}</p>
-            </div>
+          <div className="flex items-start gap-2">
+            <MapPin className="h-4 w-4 text-brand-600 mt-0.5" />
+            <span>112, Keshavji Building, Yusuf Meher Ali Road, Masjid Bunder, Mumbai, Maharashtra - 400003</span>
           </div>
-          <div className="mt-3">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#20bd5a]"
-            >
-              <MessageCircle className="h-4 w-4" />
-              Chat on WhatsApp
-            </a>
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-brand-600" />
+            <a href="tel:+917400354678" className="hover:text-brand-700">+91 7400354678</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-brand-600" />
+            <a href={`mailto:${BRAND_EMAIL}`} className="hover:text-brand-700">{BRAND_EMAIL}</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-brand-600" />
+            <span>Monday to Saturday, 10:00 AM – 7:00 PM</span>
           </div>
         </div>
-
-        <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <Clock className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-surface-500">Support Hours</p>
-              <p className="text-sm font-semibold text-surface-900">Mon – Sat, 10:00 AM – 7:00 PM</p>
-            </div>
-          </div>
-          <p className="mt-3 text-xs text-surface-500">
-            Response time is usually within a few hours during business hours.
+        <div className="mt-4 pt-4 border-t border-surface-100">
+          <p className="text-sm font-medium text-surface-700">Stay Connected</p>
+          <p className="text-xs text-surface-500 mt-1">
+            Follow us on Instagram for the latest imports, new arrivals, and special deals!
           </p>
-        </div>
-
-        <div className="rounded-2xl border border-surface-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-              <MapPin className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-surface-500">Location</p>
-              <p className="text-sm font-semibold text-surface-900">India</p>
-            </div>
-          </div>
-          <p className="mt-3 text-xs text-surface-500">
-            We ship pan-India from our trusted logistics network.
-          </p>
+          <a
+            href="https://www.instagram.com/kargopick_international/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+          >
+            @kargopick_international
+          </a>
         </div>
       </div>
 
-      <div className="mt-10 rounded-2xl border border-surface-200 bg-surface-50 p-6 sm:p-8">
+      <div className="mt-8 rounded-2xl border border-surface-200 bg-surface-50 p-6 sm:p-8">
         <h2 className="text-xl font-bold text-surface-900">Send Us a Message</h2>
         <form className="mt-6 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); alert("This is a demo contact form. Please reach out via WhatsApp or email for now."); }}>
           <div className="sm:col-span-1">
@@ -114,7 +84,7 @@ export default function ContactForm() {
         </form>
       </div>
 
-      <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-surface-200 bg-surface-50 p-6">
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-surface-200 bg-surface-50 p-6">
         <div>
           <p className="text-sm font-medium text-surface-500">Prefer instant support?</p>
           <p className="text-lg font-bold text-surface-900">Chat with us on WhatsApp.</p>

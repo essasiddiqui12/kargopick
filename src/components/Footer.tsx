@@ -45,12 +45,20 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
           <div>
             <h3 className="font-semibold text-surface-900 mb-4">Support</h3>
             <ul className="space-y-2 text-sm text-surface-600">
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">Returns Policy</a></li>
-              <li><a href="#" className="hover:text-brand-600 transition-colors">FAQ</a></li>
+              <li><a href="https://www.instagram.com/kargopick_international/" target="_blank" rel="noopener noreferrer" className="hover:text-brand-600 transition-colors">Instagram</a></li>
               <li>
                 <Link href="/track-order" className="hover:text-brand-600 transition-colors">
                   Track Order
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="hover:text-brand-600 transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-brand-600 transition-colors">
+                  Contact
                 </Link>
               </li>
             </ul>
@@ -59,9 +67,9 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
           <div>
             <h3 className="font-semibold text-surface-900 mb-4">Contact</h3>
             <ul className="space-y-3 text-sm text-surface-600">
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-brand-500" />
-                {BRAND_EMAIL}
+              <li className="flex items-start gap-2">
+                <Mail className="h-4 w-4 text-brand-500 mt-0.5" />
+                <span>{BRAND_EMAIL}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-brand-500" />
@@ -74,9 +82,9 @@ export default function Footer({ logoUrl }: { logoUrl?: string | null }) {
                   {phoneDisplay} (WhatsApp)
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-brand-500" />
-                India
+              <li className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-brand-500 mt-0.5" />
+                <span>112, Keshavji Building, Yusuf Meher Ali Road, Masjid Bunder, Mumbai, Maharashtra - 400003</span>
               </li>
             </ul>
           </div>
