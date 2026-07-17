@@ -9,11 +9,11 @@ import SiteLogo from "@/components/SiteLogo";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
+  { href: "/products?category=gym-essentials", label: "Gym Essentials" },
+  { href: "/products?category=imported", label: "Imported" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
   { href: "/track-order", label: "Track Order" },
-  { href: "/products?category=gym-essentials", label: "Gym Essentials" },
-  { href: "/products?category=imported", label: "Imported" },
 ];
 
 export default function Header({ logoUrl }: { logoUrl?: string | null }) {
