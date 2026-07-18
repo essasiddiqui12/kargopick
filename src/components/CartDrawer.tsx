@@ -104,7 +104,8 @@ export default function CartDrawer() {
           if (!current || current.product.id !== synced.product.id) return true;
           return (
             synced.product.stock !== current.product.stock ||
-            synced.product.inStock !== current.product.inStock
+            synced.product.inStock !== current.product.inStock ||
+            synced.product.price !== current.product.price
           );
         });
         if (needsSync) syncItems(syncedItems);
@@ -204,14 +205,20 @@ export default function CartDrawer() {
         address: form.address,
       };
 
+      const serverSubtotal = Number(data.subtotal ?? totalPrice);
+      const serverDiscount = Number(data.discount ?? discount ?? 0);
+      const serverTotal = Number(data.total ?? finalTotal);
+
       const url = getWhatsAppUrl(
         buildOrderMessage(
           items,
-          totalPrice,
+          serverSubtotal,
           data.id,
           customer,
-          appliedCoupon ?? undefined,
-          finalTotal,
+          appliedCoupon
+            ? { ...appliedCoupon, discount: serverDiscount }
+            : undefined,
+          serverTotal,
           form.notes || undefined
         )
       );
@@ -417,8 +424,11 @@ export default function CartDrawer() {
 
                 {items.map((item) => {
                    const issue = getIssue(item.product.id);
-                   const atMaxStock =
-                     item.product.stock > 0 && item.quantity >= item.product.stock;
+                   const variantCap = item.variantId
+                     ? item.product.variants?.find((v) => v.id === item.variantId)?.stock
+                     : undefined;
+                   const cap = variantCap ?? item.product.stock;
+                   const atMaxStock = cap > 0 && item.quantity >= cap;
                    const variant = item.variantId
                      ? item.product.variants?.find((v) => v.id === item.variantId)
                      : undefined;

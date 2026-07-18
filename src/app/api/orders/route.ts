@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createOrder } from "@/lib/orders";
 import { OrderItem } from "@/types";
 import { createAdminClient } from "@/lib/supabase/server";
+import {
+  buildOrderAlertFromOrder,
+  getWhatsAppUrl,
+} from "@/lib/whatsapp";
 
 export async function POST(request: NextRequest) {
   try {
@@ -83,7 +87,16 @@ export async function POST(request: NextRequest) {
       notes,
     });
 
-    return NextResponse.json(order, { status: 201 });
+    const adminNotifyUrl = getWhatsAppUrl(buildOrderAlertFromOrder(order));
+
+    console.log(
+      `[new-order] ${order.id} from ${order.customerName} — admin notify: ${adminNotifyUrl}`
+    );
+
+    return NextResponse.json(
+      { ...order, adminNotifyUrl },
+      { status: 201 }
+    );
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to create order" },

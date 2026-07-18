@@ -12,9 +12,10 @@ import { Order, OrderStatus } from "@/types";
 
 interface OrderConfirmationClientProps {
   order: Order;
+  adminNotifyUrl?: string;
 }
 
-export default function OrderConfirmationClient({ order }: OrderConfirmationClientProps) {
+export default function OrderConfirmationClient({ order, adminNotifyUrl }: OrderConfirmationClientProps) {
   const [verified, setVerified] = useState(false);
   const [inputPhone, setInputPhone] = useState("");
 
@@ -22,8 +23,7 @@ export default function OrderConfirmationClient({ order }: OrderConfirmationClie
   const normalizedInput = inputPhone.replace(/\D/g, "");
   const isMatch = normalizedInput.length >= 10 && normalizedOrderPhone.slice(-10) === normalizedInput.slice(-10);
 
-  const whatsappMessage = buildOrderAlertFromOrder(order as any);
-  const whatsappUrl = getWhatsAppUrl(whatsappMessage);
+  const whatsappUrl = adminNotifyUrl || getWhatsAppUrl(buildOrderAlertFromOrder(order as any));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">

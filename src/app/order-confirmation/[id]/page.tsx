@@ -1,6 +1,7 @@
 import Link from "next/link";
 import OrderConfirmationClient from "@/components/OrderConfirmationClient";
 import { getOrderById } from "@/lib/orders";
+import { buildOrderAlertFromOrder, getWhatsAppUrl } from "@/lib/whatsapp";
 import { BRAND_NAME } from "@/lib/brand";
 
 export const metadata = {
@@ -33,5 +34,7 @@ export default async function OrderConfirmationPage({
     );
   }
 
-  return <OrderConfirmationClient order={order} />;
+  const adminNotifyUrl = getWhatsAppUrl(buildOrderAlertFromOrder(order as any));
+
+  return <OrderConfirmationClient order={order} adminNotifyUrl={adminNotifyUrl} />;
 }

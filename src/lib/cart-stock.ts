@@ -40,7 +40,7 @@ export function getCartStockIssue(
       return {
         productId: item.product.id,
         name: live.name,
-        message: `Only ${variant.stock} left — reduce quantity to ${variant.stock}`,
+        message: `Only ${variant.stock} left — quantity adjusted to ${variant.stock}`,
       };
     }
     return null;
@@ -60,7 +60,7 @@ export function getCartStockIssue(
     return {
       productId: item.product.id,
       name: live.name,
-      message: `Only ${effectiveStock} left — reduce quantity to ${effectiveStock}`,
+      message: `Only ${effectiveStock} left — quantity adjusted to ${effectiveStock}`,
     };
   }
 
@@ -77,13 +77,22 @@ export function validateCartItems(
 
   for (const item of items) {
     const live = productMap.get(item.product.id);
-    const syncedItem: CartItem = live
-      ? { ...item, product: live }
-      : item;
+
+    let syncedItem: CartItem = live ? { ...item, product: live } : item;
+
+    if (live) {
+      const cap = item.variantId
+        ? live.variants?.find((v) => v.id === item.variantId)?.stock ?? live.stock
+        : live.stock;
+
+      if (cap > 0 && syncedItem.quantity > cap) {
+        syncedItem = { ...syncedItem, quantity: cap };
+      }
+    }
 
     syncedItems.push(syncedItem);
 
-    const issue = getCartStockIssue(item, live);
+    const issue = getCartStockIssue(syncedItem, live);
     if (issue) issues.push(issue);
   }
 
