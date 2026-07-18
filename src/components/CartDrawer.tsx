@@ -458,15 +458,16 @@ export default function CartDrawer() {
                            {issue.message}
                          </p>
                        )}
-                            <div className="mt-auto flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                            <div className="mt-auto flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 sm:gap-2">
                                 <button
                                   onClick={() =>
                                     updateQuantity(getCartKey(item), item.quantity - 1)
                                   }
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
+                                  className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 active:bg-surface-400 text-surface-700 transition-colors"
+                                  aria-label="Decrease quantity"
                                 >
-                                  <Minus className="h-3 w-3" />
+                                  <Minus className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                 </button>
                                 <span className="w-6 text-center text-sm font-medium text-surface-800">
                                   {item.quantity}
@@ -476,14 +477,16 @@ export default function CartDrawer() {
                                     updateQuantity(getCartKey(item), item.quantity + 1)
                                   }
                                   disabled={atMaxStock || !!issue}
-                                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                                  className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 active:bg-surface-400 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                  aria-label="Increase quantity"
                                 >
-                                  <Plus className="h-3 w-3" />
+                                  <Plus className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                                 </button>
                               </div>
                               <button
                                 onClick={() => removeFromCart(getCartKey(item))}
-                                className="text-surface-400 hover:text-rose-500 transition-colors"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-surface-400 hover:text-rose-500 hover:bg-rose-50 active:bg-rose-100 transition-colors"
+                                aria-label={`Remove ${item.product.name} from cart`}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>

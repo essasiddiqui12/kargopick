@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import SiteLogo from "@/components/SiteLogo";
 
@@ -64,15 +64,16 @@ export default function Header({ logoUrl }: { logoUrl?: string | null }) {
       </div>
 
       {mobileOpen && (
-        <nav className="md:hidden border-t border-surface-200 bg-white/95 px-4 py-4">
+        <nav className="md:hidden border-t border-surface-200 bg-white/95 px-4 py-3">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="block px-4 py-3 text-surface-700 hover:text-brand-700 rounded-lg hover:bg-brand-50"
+              className="flex items-center justify-between rounded-lg px-4 py-3 text-surface-700 hover:text-brand-700 hover:bg-brand-50 active:bg-brand-100"
             >
-              {link.label}
+              <span className="text-sm font-medium">{link.label}</span>
+              <ChevronRight className="h-4 w-4 text-surface-400" />
             </Link>
           ))}
         </nav>

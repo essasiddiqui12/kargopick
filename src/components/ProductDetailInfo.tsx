@@ -180,11 +180,11 @@ export default function ProductDetailInfo({
                         key={value}
                         onClick={() => handleAttributeSelect(key, value)}
                         disabled={!isAvailable}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                        className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-sm font-medium border transition-colors active:scale-95 ${
                           isSelected
                             ? "border-brand-500 bg-brand-50 text-brand-700"
                             : isAvailable
-                              ? "border-surface-200 bg-white text-surface-700 hover:border-brand-300"
+                              ? "border-surface-200 bg-white text-surface-700 hover:border-brand-300 active:border-brand-400"
                               : "border-surface-100 bg-surface-50 text-surface-400 cursor-not-allowed line-through"
                         }`}
                       >

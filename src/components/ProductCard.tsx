@@ -75,26 +75,26 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="mt-1 text-xs text-surface-400">{product.weight}</p>
         )}
 
-         <div className="mt-auto pt-3 flex items-center justify-between">
-           <div>
+         <div className="mt-auto pt-3 flex items-center justify-between gap-2">
+           <div className="min-w-0">
              {hasVariants ? (
                <>
-                 <span className="text-lg font-bold text-brand-600">
+                 <span className="text-base sm:text-lg font-bold text-brand-600">
                    From {formatPrice(product.price)}
                  </span>
                  {product.originalPrice && product.originalPrice > product.price && (
-                   <span className="ml-2 text-sm text-surface-400 line-through">
+                   <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-surface-400 line-through">
                      {formatPrice(product.originalPrice)}
                    </span>
                  )}
                </>
              ) : (
                <>
-                 <span className="text-lg font-bold text-brand-600">
+                 <span className="text-base sm:text-lg font-bold text-brand-600">
                    {formatPrice(product.price)}
                  </span>
                  {product.originalPrice && product.originalPrice > product.price && (
-                   <span className="ml-2 text-sm text-surface-400 line-through">
+                   <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-surface-400 line-through">
                      {formatPrice(product.originalPrice)}
                    </span>
                  )}
@@ -105,7 +105,7 @@ export default function ProductCard({ product }: ProductCardProps) {
            {hasVariants ? (
              <Link
                href={`/products/${product.id}`}
-               className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 transition-colors shadow-sm shadow-brand-500/25"
+               className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 active:scale-95 transition-colors shadow-sm shadow-brand-500/25"
                aria-label={`Select options for ${product.name}`}
              >
                <ShoppingCart className="h-4 w-4" />
@@ -114,7 +114,7 @@ export default function ProductCard({ product }: ProductCardProps) {
              <button
                onClick={() => addToCart(product)}
                disabled={!product.inStock}
-               className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm shadow-brand-500/25"
+               className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-brand-500 text-white hover:bg-brand-600 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 transition-colors shadow-sm shadow-brand-500/25"
                aria-label={`Add ${product.name} to cart`}
              >
                <ShoppingCart className="h-4 w-4" />
