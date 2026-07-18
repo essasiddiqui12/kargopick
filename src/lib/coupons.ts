@@ -74,6 +74,28 @@ export async function validateCoupon(
   return { valid: true, coupon, discount };
 }
 
+export async function validateCouponForOrder(
+  code: string,
+  subtotal: number,
+  clientDiscount: number
+): Promise<
+  | { valid: true; coupon: Coupon; discount: number }
+  | { valid: false; error: string }
+> {
+  const result = await validateCoupon(code, subtotal);
+  if (!result.valid) return result;
+
+  const tolerance = 1;
+  if (Math.abs(result.discount - clientDiscount) > tolerance) {
+    return {
+      valid: false,
+      error: "Coupon discount mismatch. Please re-apply the coupon.",
+    };
+  }
+
+  return result;
+}
+
 export async function incrementCouponUsage(code: string): Promise<void> {
   const coupon = await getCouponByCode(code);
   if (!coupon) return;
@@ -96,9 +118,7 @@ export async function createCoupon(
   );
   if (exists) throw new Error("Coupon code already exists");
 
-  const id = String(
-    Math.max(0, ...coupons.map((c) => parseInt(c.id, 10) || 0)) + 1
-  );
+  const id = crypto.randomUUID();
   const coupon: Coupon = {
     ...data,
     code: data.code.toUpperCase(),

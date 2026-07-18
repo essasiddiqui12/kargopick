@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { orderToRow, rowToOrder } from "@/lib/supabase/mappers";
-import { incrementCouponUsage, validateCoupon } from "@/lib/coupons";
+import { incrementCouponUsage, validateCouponForOrder } from "@/lib/coupons";
 import { reserveStockForOrder } from "@/lib/products";
 import { Order, OrderItem, OrderStatus } from "@/types";
 
@@ -56,18 +56,15 @@ export async function createOrder(data: {
   notes?: string;
 }): Promise<Order> {
   if (data.couponCode) {
-    const result = await validateCoupon(data.couponCode, data.subtotal);
+    const result = await validateCouponForOrder(data.couponCode, data.subtotal, data.discount ?? 0);
     if (!result.valid) {
       throw new Error(result.error);
-    }
-    if (result.discount !== (data.discount || 0)) {
-      throw new Error("Coupon discount mismatch. Please re-apply the coupon.");
     }
   }
 
   await reserveStockForOrder(data.items);
 
-  const id = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6)}`;
+  const id = `ORD-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().split("-")[0]}`;
   const order: Order = {
     ...data,
     id,

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionToken, SESSION_COOKIE } from "@/lib/auth-session";
+import { isAdminAuthenticated } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const expected = getSessionToken();
-  const session = request.cookies.get(SESSION_COOKIE)?.value;
 
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    if (!session || session !== expected) {
+    const authed = await isAdminAuthenticated();
+    if (!authed) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
 
   if (pathname === "/admin/login") {
-    if (session === expected) {
+    const authed = await isAdminAuthenticated();
+    if (authed) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   }

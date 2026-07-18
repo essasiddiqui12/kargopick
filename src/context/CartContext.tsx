@@ -14,14 +14,18 @@ import { CART_STORAGE_KEY } from "@/lib/brand";
 interface CartContextType {
   items: CartItem[];
   addToCart: (product: Product, variantId?: string, variantName?: string) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (key: string) => void;
+  updateQuantity: (key: string, quantity: number) => void;
   syncItems: (items: CartItem[]) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
+}
+
+export function getCartKey(item: CartItem): string {
+  return item.variantId ? `${item.product.id}__${item.variantId}` : item.product.id;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -89,25 +93,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setItems((prev) => prev.filter((item) => {
-      const key = item.variantId ? `${item.product.id}__${item.variantId}` : item.product.id;
-      return key !== productId;
-    }));
+  const removeFromCart = useCallback((key: string) => {
+    setItems((prev) => prev.filter((item) => getCartKey(item) !== key));
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((key: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((item) => {
-        const key = item.variantId ? `${item.product.id}__${item.variantId}` : item.product.id;
-        return key !== productId;
-      }));
+      setItems((prev) => prev.filter((item) => getCartKey(item) !== key));
       return;
     }
     setItems((prev) =>
       prev.map((item) => {
-        const key = item.variantId ? `${item.product.id}__${item.variantId}` : item.product.id;
-        if (key !== productId) return item;
+        if (getCartKey(item) !== key) return item;
         const effectiveStock = item.variantId
           ? (item.product.variants?.find((v) => v.id === item.variantId)?.stock ?? item.product.stock)
           : item.product.stock;

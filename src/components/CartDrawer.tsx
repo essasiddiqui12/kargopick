@@ -13,7 +13,7 @@ import {
   Loader2,
   AlertTriangle,
 } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { useCart, getCartKey } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/data/products";
 import { buildOrderMessage, getWhatsAppUrl } from "@/lib/whatsapp";
@@ -458,36 +458,36 @@ export default function CartDrawer() {
                            {issue.message}
                          </p>
                        )}
-                         <div className="mt-auto flex items-center justify-between">
-                           <div className="flex items-center gap-2">
-                             <button
-                               onClick={() =>
-                                 updateQuantity(item.product.id, item.quantity - 1)
-                               }
-                               className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
-                             >
-                               <Minus className="h-3 w-3" />
-                             </button>
-                             <span className="w-6 text-center text-sm font-medium text-surface-800">
-                               {item.quantity}
-                             </span>
-                             <button
-                               onClick={() =>
-                                 updateQuantity(item.product.id, item.quantity + 1)
-                               }
-                               disabled={atMaxStock || !!issue}
-                               className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                             >
-                               <Plus className="h-3 w-3" />
-                            </button>
-                           </div>
-                            <button
-                              onClick={() => removeFromCart(item.product.id)}
-                              className="text-surface-400 hover:text-rose-500 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                         </div>
+                            <div className="mt-auto flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(getCartKey(item), item.quantity - 1)
+                                  }
+                                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700"
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </button>
+                                <span className="w-6 text-center text-sm font-medium text-surface-800">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    updateQuantity(getCartKey(item), item.quantity + 1)
+                                  }
+                                  disabled={atMaxStock || !!issue}
+                                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => removeFromCart(getCartKey(item))}
+                                className="text-surface-400 hover:text-rose-500 transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
                        </div>
                     </div>
                   );

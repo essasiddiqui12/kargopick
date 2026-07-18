@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getSessionToken,
-  SESSION_COOKIE,
+  createSession,
   verifyPassword,
 } from "@/lib/auth";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
@@ -19,15 +18,17 @@ export async function POST(request: NextRequest) {
 
   const { password } = await request.json();
 
-  if (!password || !verifyPassword(password)) {
+  if (!password || !(await verifyPassword(password))) {
     return NextResponse.json(
       { error: "Invalid password", remaining: rateLimit.remaining },
       { status: 401 }
     );
   }
 
+  const sessionId = await createSession();
+
   const response = NextResponse.json({ success: true });
-  response.cookies.set(SESSION_COOKIE, getSessionToken(), {
+  response.cookies.set("kargopick-admin-session", sessionId, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

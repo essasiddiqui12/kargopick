@@ -219,10 +219,7 @@ export async function createProduct(
   data: Omit<Product, "id">
 ): Promise<Product> {
   const supabase = createAdminClient();
-  const products = await getProducts();
-  const id = String(
-    Math.max(0, ...products.map((p) => parseInt(p.id, 10) || 0)) + 1
-  );
+  const id = crypto.randomUUID();
   const stockFields = syncStockFields(data);
   const product = normalizeProduct({ ...data, ...stockFields, id });
   const { error } = await supabase.from("products").insert(productToRow(product));
@@ -314,15 +311,12 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
 
       if (variant) {
         const newStock = Math.max(0, variant.stock - item.quantity);
-        if (newStock < 0) {
-          throw new Error(
-            `Insufficient stock for ${item.name} (${item.variantName}). Only ${variant.stock} left.`
-          );
-        }
-        await supabase
+        const { error } = await supabase
           .from("product_variants")
           .update({ stock: newStock })
           .eq("id", item.variantId);
+
+        if (error) throw new Error(error.message);
       }
     } else {
       const { data: product } = await supabase
@@ -333,15 +327,12 @@ export async function reserveStockForOrder(items: OrderItem[]): Promise<void> {
 
       if (product) {
         const newStock = Math.max(0, product.stock - item.quantity);
-        if (newStock < 0) {
-          throw new Error(
-            `Insufficient stock for ${item.name}. Only ${product.stock} left.`
-          );
-        }
-        await supabase
+        const { error } = await supabase
           .from("products")
           .update({ stock: newStock, in_stock: newStock > 0 })
           .eq("id", item.productId);
+
+        if (error) throw new Error(error.message);
       }
     }
   }
@@ -361,8 +352,7 @@ export async function getVariantsByProductId(productId: string): Promise<Product
 
 export async function createVariant(data: Omit<ProductVariant, "id">): Promise<ProductVariant> {
   const supabase = createAdminClient();
-  const variants = await getVariantsByProductId(data.productId);
-  const id = `var_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+  const id = crypto.randomUUID();
   const variant = { ...data, id };
   const { error } = await supabase.from("product_variants").insert(variantToRow(variant));
 

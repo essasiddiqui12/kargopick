@@ -1,4 +1,4 @@
-export type Category = string;
+export type Category = "gym-essentials" | "imported";
 
 export type OrderStatus =
   | "pending"
