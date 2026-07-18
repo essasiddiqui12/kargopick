@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
 
   const { password } = await request.json();
 
-  if (!password || !(await verifyPassword(password))) {
+  const passwordOk = await verifyPassword(password);
+  console.log("[admin-login] passwordCheck:", passwordOk, "envSet:", !!process.env.ADMIN_PASSWORD);
+
+  if (!password || !passwordOk) {
     return NextResponse.json(
       { error: "Invalid password", remaining: rateLimit.remaining },
       { status: 401 }
